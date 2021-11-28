@@ -1,13 +1,11 @@
-Introducción
-------------
+# Introducción
 
 Este documento tiene como objetivo establecer la metodología que se utilizará
 en el desarrollo del backend del Portal de Pacientes del La Rioja. De esta manera
 se podrá realizar las tareas de manera más ordenada y coordinada. 
 
 
-Ciclo de desarrollo
--------------------
+# Ciclo de desarrollo
 
 Cada bug o feature, que se vaya a a resolver y/o desarrollar, debe comenzar estar
 registrado en una tarjeta de Trello.
@@ -34,3 +32,28 @@ Cuando se asigna una tarjeta de Trello a una persona, esta persona es responsabl
 la tarjeta actualizada y en su estado correcto. Se pide mantener siempre actualizada con
 comentarios explicando los avances o problemas que se tiene en la tarjeta, de esta manera
 el equipo compleo sabe si hay un problema que necesita atención.
+
+# Backend
+
+El backend está escrito en Python 3.9. Existe muchos recursos de Python en internet que se puede
+consultar. La Documentación oficial de Python se la puede encontrar acá [0] y acá en español [1].
+
+Se utiliza el framework FastAPI [2] en el desarrollo.
+
+## Commits
+
+Se recomiendo que cada commit sea atómico, y lo más consiso posible. En el mensaje del commit
+siempre se debe colocar le mayor detalle posible de lo que se está agregando.
+
+Como es un proyecto que recien está comenzando es dificil genera commits pequeños, pero en la
+medida que se pueda, lo haremos. Algo de recursos para leer sobre commits [3][4][5].
+
+
+
+
+[0] https://docs.python.org/3.9/
+[1] https://docs.python.org/es/3.9/
+[2] https://fastapi.tiangolo.com
+[3] https://www.freecodecamp.org/news/writing-good-commit-messages-a-practical-guide/
+[4] https://www.conventionalcommits.org/en/v1.0.0/
+[5] https://www.linkedin.com/pulse/how-write-good-commit-messages-yuvraj-singh-rajawat/
