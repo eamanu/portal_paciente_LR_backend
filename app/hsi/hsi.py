@@ -3,7 +3,7 @@ from typing import Dict
 
 import requests
 
-from app.config import HSI_PASSWORD, HSI_URL, HSI_USERNAME, HSI_ORIGIN_HEADER
+from app.hsi.config import HSI_PASSWORD, HSI_URL, HSI_USERNAME, HSI_ORIGIN_HEADER
 
 
 class HSIToken:
@@ -37,6 +37,7 @@ class HSIToken:
         req = json.loads(requests.post(self.url, data=self.data, headers=self.header).text)
         self.token = req['token']
         self.refresh_token = req['refreshToken']
+        return self
 
 
 class HCEGeneralState:

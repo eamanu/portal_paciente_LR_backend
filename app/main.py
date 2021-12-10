@@ -1,6 +1,11 @@
 from fastapi import FastAPI
+from app.routes import institutions
+
 
 app = FastAPI()
+
+
+app.include_router(institutions.router)
 
 
 @app.get("/")
