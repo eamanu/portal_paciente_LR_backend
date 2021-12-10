@@ -35,3 +35,5 @@ uvicorn==0.15.0
 uvloop==0.16.0
 watchgod==0.7
 websockets==10.1
+pytest-mock==3.6.1
+requests-mock==1.9.3
