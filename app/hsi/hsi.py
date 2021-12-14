@@ -38,20 +38,3 @@ class HSIToken:
         self.token = req['token']
         self.refresh_token = req['refreshToken']
         return self
-
-
-class HCEGeneralState:
-    def __init__(self):
-        self.token = HSIToken().token
-        self.base_url = HSI_URL
-        self.endpoint = '/api/institutions/{institutionId}/patient/{patientId}/hce/general-state'
-
-    @property
-    def headers(self):
-        return {"accept": "*/*", "Authorization": self.token}
-
-    def get_vital_signs(self, institution_id, patient_id) -> Dict:
-        final_endpoint = '/vitalSigns'
-        url = self.base_url + self.endpoint.format(institutionId=institution_id, patientId=patient_id) + final_endpoint
-        req = requests.get(url, headers=self.headers)
-        return json.loads(req.text)
