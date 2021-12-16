@@ -9,7 +9,7 @@ from app.hsi.hsi import HSIToken
 
 class HCEGeneralState:
     def __init__(self):
-        self.token = HSIToken().token
+        self.token = HSIToken().connect().token
         self.hce_vital_sign = HCE_VITAL_SIGNS
 
     @property
