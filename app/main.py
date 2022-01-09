@@ -1,16 +1,12 @@
 from fastapi import FastAPI
 
-from app.routes import (
-    hce_general,
-    institutions,
-    persons
-)
+from app.routes.hsi import hsi
 
-app = FastAPI()
+app = FastAPI(title="Portal del paciente",
+              description="Interfaz de programación para exponer información relativa al paciente.",
+              version="0.0.1")
 
-app.include_router(institutions.router)
-app.include_router(persons.router)
-app.include_router(hce_general.router)
+app.include_router(hsi.router_hsi)
 
 
 @app.get("/")

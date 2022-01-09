@@ -3,7 +3,7 @@ from typing import Dict
 
 import requests
 
-from app.hsi.config import HSI_PASSWORD, HSI_URL, HSI_USERNAME, HSI_ORIGIN_HEADER
+from app.gear.config import HSI_PASSWORD, HSI_URL, HSI_USERNAME, HSI_ORIGIN_HEADER
 
 
 class HSIToken:

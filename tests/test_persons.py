@@ -1,7 +1,7 @@
 import requests_mock
 
-from app.hsi.hsi import HSIToken
-from app.hsi.persons import HSIPersons
+from app.gear.hsi.hsi_token import HSIToken
+from app.gear.hsi import HSIPersons
 
 
 def test_headers(mocker):
