@@ -3,6 +3,21 @@ from typing import Dict
 from app.routes.common import router_hsi
 
 ###############################################################################
+## Parametric data ############################################################
+###############################################################################
+
+@router_hsi.get("/parametric/identificationtypes", tags=['Parametric'])
+async def get_identification_types() -> Dict:
+    hsi_impl = HSI_Impl()
+    return hsi_impl.get_identification_types()
+
+
+@router_hsi.get("/parametric/provinces", tags=['Parametric'])
+async def get_provinces() -> Dict:
+    hsi_impl = HSI_Impl()
+    return hsi_impl.get_provinces()
+
+###############################################################################
 ## HCEGeneral #################################################################
 ###############################################################################
 
@@ -33,11 +48,26 @@ async def all_institutions() -> Dict:
 ## Patient ####################################################################
 ###############################################################################
 
-@router_hsi.get("/patient/completedata", tags=['Patient'])
-async def complete_data(gender_id: int, id_number: int,
-                        id_type: int) -> Dict:
+@router_hsi.get("/patient/basicdata", tags=['Patient'])
+async def basic_data(gender_id: int, identification_number: int, type_id: int) -> Dict:
     hsi_impl = HSI_Impl()
-    id_patient = hsi_impl.minimal_search(gender_id, id_number, id_type)[0]
+    arr = hsi_impl.minimal_search(gender_id, identification_number, type_id)
 
-    return hsi_impl.get_patient_complete_data(id_patient)
+    if arr != []:
+        id_patient = arr[0]
+        return hsi_impl.get_patient_basic_data(id_patient)
+    else:
+        return ""
+
+@router_hsi.get("/patient/completedata", tags=['Patient'])
+async def complete_data(gender_id: int, identification_number: int,
+                        type_id: int) -> Dict:
+    hsi_impl = HSI_Impl()
+    ids_patient = hsi_impl.minimal_search(gender_id, identification_number, type_id)
+
+    if ids_patient != []:
+        id_patient = ids_patient[0]
+        return hsi_impl.get_patient_complete_data(id_patient)
+    else:
+        return ""
 
