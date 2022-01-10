@@ -21,17 +21,65 @@ async def get_provinces() -> Dict:
 ## HCEGeneral #################################################################
 ###############################################################################
 
-@router_hsi.get("/hcegeneral/{institution_id}/vitalsigns/{patient_id}", tags=['HCEGeneral'])
-async def get_vital_signs(institution_id: int, patient_id: int) -> Dict:
+@router_hsi.get("/hcegeneral/{institution_id}/allergies/{patient_id}", tags=['HCEGeneral'])
+async def get_allergies(institution_id: int, patient_id: int) -> Dict:
     hsi_impl = HSI_Impl()
-    return hsi_impl.get_vital_signs(institution_id, patient_id)
+    return hsi_impl.get_allergies(institution_id, patient_id)
 
+@router_hsi.get("/hcegeneral/{institution_id}/anthropometricData/{patient_id}", tags=['HCEGeneral'])
+async def get_anthropometric_data(institution_id: int, patient_id: int) -> Dict:
+    hsi_impl = HSI_Impl()
+    return hsi_impl.get_anthropometric_data(institution_id, patient_id)
 
-@router_hsi.get("/hcegeneral/{institution_id}/solvedproblems/{patient_id}", tags=['HCEGeneral'])
+@router_hsi.get("/hcegeneral/{institution_id}/chronic/{patient_id}", tags=['HCEGeneral'])
+async def get_chronic(institution_id: int, patient_id: int) -> Dict:
+    hsi_impl = HSI_Impl()
+    return hsi_impl.get_chronic(institution_id, patient_id)
+
+@router_hsi.get("/hcegeneral/{institution_id}/familyHistories/{patient_id}", tags=['HCEGeneral'])
+async def get_family_histories(institution_id: int, patient_id: int) -> Dict:
+    hsi_impl = HSI_Impl()
+    return hsi_impl.get_family_histories(institution_id, patient_id)
+
+@router_hsi.get("/hcegeneral/{institution_id}/hospitalization/{patient_id}", tags=['HCEGeneral'])
+async def get_hospitalization(institution_id: int, patient_id: int) -> Dict:
+    hsi_impl = HSI_Impl()
+    return hsi_impl.get_hospitalization(institution_id, patient_id)
+
+@router_hsi.get("/hcegeneral/{institution_id}/immunizations/{patient_id}", tags=['HCEGeneral'])
+async def get_immunizations(institution_id: int, patient_id: int) -> Dict:
+    hsi_impl = HSI_Impl()
+    return hsi_impl.get_immunizations(institution_id, patient_id)
+
+@router_hsi.get("/hcegeneral/{institution_id}/medications/{patient_id}", tags=['HCEGeneral'])
+async def get_medications(institution_id: int, patient_id: int) -> Dict:
+    hsi_impl = HSI_Impl()
+    return hsi_impl.get_medications(institution_id, patient_id)
+
+@router_hsi.get("/hcegeneral/{institution_id}/personalHistories/{patient_id}", tags=['HCEGeneral'])
+async def get_personal_histories(institution_id: int, patient_id: int) -> Dict:
+    hsi_impl = HSI_Impl()
+    return hsi_impl.get_personal_histories(institution_id, patient_id)
+
+@router_hsi.get("/hcegeneral/{institution_id}/toothRecords/{patient_id}/tooth/{tooth_sct_id}", tags=['HCEGeneral'])
+async def get_tooth_records(institution_id: int, patient_id: int, tooth_sct_id:str) -> Dict:
+    hsi_impl = HSI_Impl()
+    return hsi_impl.get_tooth_records(institution_id, patient_id, tooth_sct_id)
+
+@router_hsi.get("/hcegeneral/{institution_id}/activeProblems/{patient_id}", tags=['HCEGeneral'])
+async def get_active_problems(institution_id: int, patient_id: int) -> Dict:
+    hsi_impl = HSI_Impl()
+    return hsi_impl.get_active_problems(institution_id, patient_id)
+
+@router_hsi.get("/hcegeneral/{institution_id}/solvedProblems/{patient_id}", tags=['HCEGeneral'])
 async def get_solved_problems(institution_id: int, patient_id: int) -> Dict:
     hsi_impl = HSI_Impl()
     return hsi_impl.get_solved_problems(institution_id, patient_id)
 
+@router_hsi.get("/hcegeneral/{institution_id}/vitalSigns/{patient_id}", tags=['HCEGeneral'])
+async def get_vital_signs(institution_id: int, patient_id: int) -> Dict:
+    hsi_impl = HSI_Impl()
+    return hsi_impl.get_vital_signs(institution_id, patient_id)
 
 ###############################################################################
 ## Institutions ###############################################################
@@ -43,12 +91,11 @@ async def all_institutions() -> Dict:
     return hsi_impl.get_all_institutions()
 
 
-
 ###############################################################################
 ## Patient ####################################################################
 ###############################################################################
 
-@router_hsi.get("/patient/basicdata", tags=['Patient'])
+@router_hsi.get("/patient/basicData", tags=['Patient'])
 async def basic_data(gender_id: int, identification_number: int, type_id: int) -> Dict:
     hsi_impl = HSI_Impl()
     arr = hsi_impl.minimal_search(gender_id, identification_number, type_id)
@@ -59,7 +106,7 @@ async def basic_data(gender_id: int, identification_number: int, type_id: int) -
     else:
         return ""
 
-@router_hsi.get("/patient/completedata", tags=['Patient'])
+@router_hsi.get("/patient/completeData", tags=['Patient'])
 async def complete_data(gender_id: int, identification_number: int,
                         type_id: int) -> Dict:
     hsi_impl = HSI_Impl()
