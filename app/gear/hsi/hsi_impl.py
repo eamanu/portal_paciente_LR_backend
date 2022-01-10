@@ -12,7 +12,7 @@ class HSI_Impl:
 
         self.token = HSIToken().connect().token
 
-
+    # region General
 
     @property
     def headers(self):
@@ -25,9 +25,9 @@ class HSI_Impl:
             req = requests.get(endpoint, headers=self.headers, params=payload)
         return json.loads(req.text)
 
-    ###############################################################################
-    ## Parametric data ############################################################
-    ###############################################################################
+    # endregion
+
+    # region Parametric data
 
     def get_identification_types(self) -> Dict:
         return self.get_generic(config.ALL_IDENTIFICATION_TYPES)
@@ -35,9 +35,9 @@ class HSI_Impl:
     def get_provinces(self) -> Dict:
         return self.get_generic(config.ALL_PROVINCES)
 
-    ###############################################################################
-    ## HCEGeneral #################################################################
-    ###############################################################################
+    # endregion
+
+    # region HCEGeneral
 
     def get_allergies(self, institution_id, patient_id) -> Dict:
         return self.get_generic(config.HCE_ALLERGIES.format(institutionId=institution_id, patientId=patient_id))
@@ -75,16 +75,16 @@ class HSI_Impl:
     def get_vital_signs(self, institution_id, patient_id) -> Dict:
         return self.get_generic(config.HCE_VITAL_SIGNS.format(institutionId=institution_id, patientId=patient_id))
 
-    ###############################################################################
-    ## Institutions ###############################################################
-    ###############################################################################
+    # endregion
+
+    # region Institutions
 
     def get_all_institutions(self):
         return self.get_generic(config.ALL_INSTITUTIONS)
 
-    ###############################################################################
-    ## Patient ####################################################################
-    ###############################################################################
+    # endregion
+
+    # region Patient
 
     def minimal_search(self, gender_id: int, identification_number: int, type_id: int) -> List:
         return self.get_generic(config.MINIMAL_SEARCH, {"genderId": gender_id, "identificationTypeId": type_id, "identificationNumber": identification_number})
@@ -95,3 +95,4 @@ class HSI_Impl:
     def get_patient_complete_data(self, patient_id: int) -> Dict:
         return self.get_generic(config.PATIENT_COMPLETE_DATA % patient_id)
 
+    # endregion

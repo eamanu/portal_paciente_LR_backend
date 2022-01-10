@@ -1,15 +1,16 @@
 import os
 
-###############################################################################
-## HSI - La Rioja #############################################################
-###############################################################################
+# region HSI - La Rioja
 
 HSI_URL = "http://hsi.larioja.gob.ar:8080"
 HSI_USERNAME = os.getenv("HSI_USERNAME")
 HSI_PASSWORD = os.getenv("HSI_PASSWORD")
 HSI_ORIGIN_HEADER = "portal_paciente_lr"
 
-# endpoints
+# endregion
+
+# region HSI end points
+
 API_BASE = HSI_URL + "/api"
 ALL_INSTITUTIONS = API_BASE + "/institution/all"
 ALL_IDENTIFICATION_TYPES = API_BASE + "/backoffice/identificationTypes/elements"
@@ -29,3 +30,4 @@ HCE_TOOTH_RECORDS = API_BASE + "/institutions/{institutionId}/patient/{patientId
 HCE_ACTIVE_PROBLEMS = API_BASE + "/institutions/{institutionId}/patient/{patientId}/hce/general-state/activeProblems"
 HCE_VITAL_SIGNS = API_BASE + "/institutions/{institutionId}/patient/{patientId}/hce/general-state/vitalSigns"
 
+# endregion

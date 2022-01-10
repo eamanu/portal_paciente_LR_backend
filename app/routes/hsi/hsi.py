@@ -2,9 +2,7 @@ from app.gear.hsi.hsi_impl import HSI_Impl
 from typing import Dict
 from app.routes.common import router_hsi
 
-###############################################################################
-## Parametric data ############################################################
-###############################################################################
+# region Parametric data
 
 @router_hsi.get("/parametric/identificationtypes", tags=['Parametric'])
 async def get_identification_types() -> Dict:
@@ -17,9 +15,9 @@ async def get_provinces() -> Dict:
     hsi_impl = HSI_Impl()
     return hsi_impl.get_provinces()
 
-###############################################################################
-## HCEGeneral #################################################################
-###############################################################################
+# endregion
+
+# region HCEGeneral
 
 @router_hsi.get("/hcegeneral/{institution_id}/allergies/{patient_id}", tags=['HCEGeneral'])
 async def get_allergies(institution_id: int, patient_id: int) -> Dict:
@@ -81,19 +79,18 @@ async def get_vital_signs(institution_id: int, patient_id: int) -> Dict:
     hsi_impl = HSI_Impl()
     return hsi_impl.get_vital_signs(institution_id, patient_id)
 
-###############################################################################
-## Institutions ###############################################################
-###############################################################################
+# endregion
+
+# region Institutions
 
 @router_hsi.get("/institutions/all", tags=['Institutions'])
 async def all_institutions() -> Dict:
     hsi_impl = HSI_Impl()
     return hsi_impl.get_all_institutions()
 
+# endregion
 
-###############################################################################
-## Patient ####################################################################
-###############################################################################
+# region Patient
 
 @router_hsi.get("/patient/basicData", tags=['Patient'])
 async def basic_data(gender_id: int, identification_number: int, type_id: int) -> Dict:
@@ -118,3 +115,4 @@ async def complete_data(gender_id: int, identification_number: int,
     else:
         return ""
 
+# endregion
