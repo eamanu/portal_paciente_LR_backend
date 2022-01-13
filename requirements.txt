@@ -37,4 +37,10 @@ watchgod==0.7
 websockets==10.1
 pytest-mock==3.6.1
 requests-mock==1.9.3
+<<<<<<< HEAD
 
+=======
+SQLAlchemy~=1.4.29
+bcrypt~=3.2.0
+jose[cryptography]~=1.0.0
+>>>>>>> main
