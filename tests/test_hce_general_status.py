@@ -1,7 +1,7 @@
 import requests_mock
 
-from app.hsi.hce_general_state import HCEGeneralState
-from app.hsi.hsi import HSIToken
+from app.gear.hsi import HCEGeneralState
+from app.gear.hsi.hsi_token import HSIToken
 
 
 def test_headers(mocker):

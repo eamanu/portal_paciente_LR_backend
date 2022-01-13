@@ -11,18 +11,16 @@ def get_db():
         db.close()
 
 
-from app.routes import (
-    hce_general,
-    institutions,
-    persons,
-    auth,
-)
+from app.routes.hsi import hsi
+from app.routes import auth
 
-app = FastAPI()
 
-app.include_router(institutions.router)
-app.include_router(persons.router)
-app.include_router(hce_general.router)
+app = FastAPI(title="Portal del paciente",
+              description="Interfaz de programación para exponer información relativa al paciente.",
+              version="0.0.1")
+
+
+app.include_router(hsi.router_hsi)
 app.include_router(auth.router)
 
 
