@@ -2,6 +2,8 @@ from app.models.user import User as model_user
 from app.schemas.user import User as schema_user
 from sqlalchemy.orm import Session
 from app.config.database import SessionLocal
+from fastapi import Request
+from pprint import pprint
 
 class Local_Impl:
 
@@ -9,6 +11,11 @@ class Local_Impl:
         pass
 
     db: Session = SessionLocal()
+
+    async def filter_request_for_authorization(self, request: Request, call_next):
+        pprint(vars(request))
+        response = await call_next(request)
+        return response
 
     def get_users(self):
         value = self.db.query(model_user).fetchall()
