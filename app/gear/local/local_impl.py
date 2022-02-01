@@ -1,9 +1,16 @@
 from app.models.user import User as model_user
 from app.schemas.user import User as schema_user
+from app.schemas.token import Token as schema_token
+from app.models.expiration_black_list import ExpirationBlackList as model_expiration_black_list
 from sqlalchemy.orm import Session
 from app.config.database import SessionLocal
-from fastapi import Request
+from fastapi import Request, HTTPException, status
 from pprint import pprint
+from datetime import datetime
+from app.config.config import SECRET_KEY, ALGORITHM
+from fastapi.responses import JSONResponse
+from jose import jwt
+
 
 class Local_Impl:
 
@@ -13,9 +20,22 @@ class Local_Impl:
     db: Session = SessionLocal()
 
     async def filter_request_for_authorization(self, request: Request, call_next):
-        pprint(vars(request))
+
+        # pprint(vars(request))
+
+        if(request.scope["path"] != "/portalpaciente/api/v1/login"):
+
+            # Verificación de existencia del token...
+            if not request.scope["headers"][0][0] == b'authorization':
+                return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content="")
+
+            # Verificación del token válido...
+            if(self.is_token_expired(request.scope["headers"][0][1])):
+                return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content="")
+
         response = await call_next(request)
         return response
+
 
     def get_users(self):
         value = self.db.query(model_user).fetchall()
@@ -54,4 +74,27 @@ class Local_Impl:
         self.db.commit()
         return old_user
 
+    def set_expiration_black_list(self, token: str):
 
+        expiration_black_list = model_expiration_black_list()
+
+        expiration_black_list.register_datetime = datetime.utcnow()
+        expiration_black_list.token = token
+
+        self.db.add(expiration_black_list)
+        self.db.commit()
+        value = self.db.query(model_expiration_black_list).where(model_expiration_black_list.id == expiration_black_list.id).first()
+
+        return value
+
+    def is_token_expired(self, token: str):
+
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+
+        expires = datetime.fromtimestamp(payload.get("exp"))
+
+        if expires < datetime.utcnow():
+            Local_Impl().set_expiration_black_list(token)
+            return True
+
+        return False

@@ -16,11 +16,32 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `identification_type`
+-- Table structure for table `expiration_black_list`
 --
 
-CREATE DATABASE `portal_paciente_LR` /*!40100 DEFAULT CHARACTER SET latin1 COLLATE latin1_spanish_ci */;
+DROP TABLE IF EXISTS `expiration_black_list`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `expiration_black_list` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `register_datetime` datetime DEFAULT NULL,
+  `token` varchar(500) COLLATE latin1_spanish_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Dumping data for table `expiration_black_list`
+--
+
+LOCK TABLES `expiration_black_list` WRITE;
+/*!40000 ALTER TABLE `expiration_black_list` DISABLE KEYS */;
+/*!40000 ALTER TABLE `expiration_black_list` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `identification_type`
+--
 
 DROP TABLE IF EXISTS `identification_type`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -221,4 +242,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-01-27 14:48:33
+-- Dump completed on 2022-02-01 14:18:46
