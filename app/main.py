@@ -1,6 +1,6 @@
-from fastapi import FastAPI
-from app.database import SessionLocal
-
+from fastapi import FastAPI, Request
+from app.config.database import SessionLocal
+from app.gear.local.local_impl import Local_Impl
 
 # Dependency
 def get_db():
@@ -12,16 +12,20 @@ def get_db():
 
 
 from app.routes.hsi import hsi
-from app.routes import auth
+from app.routes.local import local
 
 
 app = FastAPI(title="Portal del paciente",
               description="Interfaz de programación para exponer información relativa al paciente.",
               version="0.0.1")
 
-
 app.include_router(hsi.router_hsi)
-app.include_router(auth.router)
+app.include_router(local.router_local)
+
+
+@app.middleware("http")
+async def filter_request_for_authorization(request: Request, call_next):
+    return await Local_Impl().filter_request_for_authorization(request, call_next)
 
 
 @app.get("/")

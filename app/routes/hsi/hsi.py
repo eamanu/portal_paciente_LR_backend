@@ -1,6 +1,7 @@
 from app.gear.hsi.hsi_impl import HSI_Impl
 from typing import Dict
 from app.routes.common import router_hsi
+from app.schemas.token import Token
 
 # region Parametric data
 

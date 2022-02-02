@@ -6,32 +6,40 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from app.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
-from app.model import Users
-from app.schemas import TokenData
+from app.config.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from app.models.user import User
+from app.schemas.token_data import TokenData
+from app.gear.local.local_impl import Local_Impl
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-def get_user(db: Session, user_id: str) -> Users:
-    return db.query(Users).filter_by(user_id=user_id).first()
+def get_user(username: str) -> User:
+    return Local_Impl().get_user(username=username)
 
 
-def authenticate_user(db: Session, user_id: str, password: str) -> bool:
-    user = get_user(db, user_id)
+def authenticate_user(db: Session, username: str, password: str) -> bool:
+    user = get_user(username)
     if user is None:
         return False
     return user.check_password(password)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+
     to_encode = data.copy()
+
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+    print("jwt.decode(encoded_jwt): ")
+    print(jwt.decode(encoded_jwt, SECRET_KEY))
+
     return encoded_jwt
 
 
@@ -43,13 +51,13 @@ async def get_current_user(db: Session, token: str = Depends(oauth2_scheme)):
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: str = payload.get("sub")
-        if user_id is None:
+        username: str = payload.get("sub")
+        if username is None:
             raise credentials_exception
-        token_data = TokenData(username=user_id)
+        token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
-    user = get_user(db, user_id=token_data.username)
+    user = get_user(db, username=token_data.username)
     if user is None:
         raise credentials_exception
     return user
