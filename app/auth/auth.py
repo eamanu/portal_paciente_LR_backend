@@ -15,7 +15,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 def get_user(username: str) -> User:
-    return Local_Impl().get_user(username=username)
+    return Local_Impl().get_user_by_username(username=username)
 
 
 def authenticate_user(db: Session, username: str, password: str) -> bool:
@@ -37,6 +37,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
+    # TODO: Agregar logger
     print("jwt.decode(encoded_jwt): ")
     print(jwt.decode(encoded_jwt, SECRET_KEY))
 

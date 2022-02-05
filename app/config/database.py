@@ -3,28 +3,21 @@
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from app.config.config import DATABASE_DEFAULT, DATABASE_URL
 
 # endregion
 
-# region SQLite
+SQLITE = 'sqlite'
+MYSQL = 'mysql'
 
-# SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
-SQLALCHEMY_DATABASE_URL = "sqlite:///./app/portal_paciente.db"
-engine01 = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
-#SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine01)
+if DATABASE_DEFAULT == SQLITE:
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+else:
+    engine = create_engine(DATABASE_URL)
 
 Base = declarative_base()
-
-# endregion
-
-# region MySql
-
-MYSQL_DATABASE_URL = "mysql+pymysql://root:root@127.0.0.1:3306/portal_paciente_LR"
-engine02 = create_engine(MYSQL_DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine02)
-
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 meta = MetaData()
-
-conn = engine02.connect()
+conn = engine.connect()
 
 # endregion
