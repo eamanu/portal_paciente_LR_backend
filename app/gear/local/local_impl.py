@@ -17,8 +17,8 @@ class Local_Impl:
 
     async def filter_request_for_authorization(self, request: Request, call_next):
         # TODO: should be in config.py ¿?
-        if request.scope["path"] != "/portalpaciente/api/v1/login":
-
+        path = request.scope["path"]
+        if path not in ("/portalpaciente/api/v1/login", "/docs", "/openapi.json"):
             # Verificación de existencia del token...
             if not request.scope["headers"][0][0] == b'authorization':
                 return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content="")
