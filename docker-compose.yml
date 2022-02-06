@@ -1,0 +1,29 @@
+version: "3.1"
+services:
+  mysql:
+    image: mariadb:latest 
+    container_name: portal_pacientes_db
+    env_file:
+      - .env_database
+    restart: always
+    ports:
+      - 3306:3306
+    volumes:
+      - ~/portal_paciente_database:/var/lib/mysql
+ 
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+  app:
+    build: .
+    container_name: portal_pacientes_app
+    env_file:
+      - .env_backend
+    restart: always
+    depends_on:
+      - mysql
+    ports:
+      - 80:80
