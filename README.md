@@ -30,3 +30,39 @@ Para ejecutar las api de HSI se deben setear las siguientes variables de entorno
 
   * HSI_USERNAME
   * HSI_PASSWORD
+
+# Uso de docker-compose
+Para levantar la aplicación haciendo uso de Docker Compose es necesario
+tener instalado Docker y Docker Compose.
+
+Primero se debe crear los archivos que contienen las variables de 
+entorno, uno para backend (`.env_backend`) y otro para la base de datos
+(`.env_database`) con la siguiente información:
+
+#### .env_backend
+HSI_USERNAME=<hsi_user>
+HSI_PASSWORD=<hsi_password>
+DATABASE_URL=mysql+pymysql://<user>:<password>@portal_pacientes_db:3306/portal_paciente_LR
+
+#### .env_database
+MYSQL_ROOT_PASSWORD=<pass>
+MYSQL_DATABASE=portal_paciente_LR
+MYSQL_USER=<user>
+MYSQL_PASSWORD=<user>
+
+Luego se debe levantar la aplicación ejecutando desde la raiz del
+proyecto:
+
+```bash
+$ docker-compose up -d
+```
+
+Este docker-compose levanta un MariaDB y el Backend, además de Adminer para
+la gestión de la base de datos. Si no se quiere instalar Adminer eliminar el 
+servicio del docker-compose.
+
+Luego debemos crear la base de datos ejecutando el siguiente commando:
+
+```bash
+$ cat database/initfile.sql | docker exec -i portal_pacientes_db /usr/bin/mysql -u root  --password=root portal_paciente_LR
+```
