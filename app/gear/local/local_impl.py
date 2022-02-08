@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from fastapi import Request, status
 from fastapi.responses import Response
@@ -101,6 +101,17 @@ class LocalImpl:
 
         return value
 
+    def delete_old_tokens(self):
+
+        timestamp = datetime.now() - timedelta(days=1)
+
+        expiration_black_list_elements = self.db.query(model_expiration_black_list).where(model_expiration_black_list.register_datetime < timestamp).all()
+
+        for e in expiration_black_list_elements:
+            self.db.delete(e)
+
+        self.db.commit()
+
     def is_token_expired(self, bearer_schema: str):
         token = bearer_schema.split("Bearer ")[1]
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -108,9 +119,10 @@ class LocalImpl:
         disabled = False
 
         if expires < datetime.now():
-            LocalImpl().set_expiration_black_list(token)
-            # Add process to remove old tokens
+            self.set_expiration_black_list(token)
             disabled = True
+
+        self.delete_old_tokens()
 
         return disabled
 
