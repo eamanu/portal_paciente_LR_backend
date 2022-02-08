@@ -1,11 +1,12 @@
 from datetime import datetime
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 from app.config.config import SECRET_KEY, ALGORITHM
 from app.main import get_db
-from app.gear.local.local_impl import Local_Impl
+from app.gear.local.local_impl import LocalImpl
+from typing import Dict
 from app.routes import auth
 from app.routes.common import router_local
 from app.schemas.token import Token
@@ -35,7 +36,7 @@ async def logout(token: Token):
         if expires is None:
             raise credentials_exception
 
-        Local_Impl().set_expiration_black_list(token)
+        LocalImpl().set_expiration_black_list(token)
 
     except JWTError:
         raise credentials_exception
@@ -43,4 +44,14 @@ async def logout(token: Token):
 
 @router_local.post("/createuser")
 async def create_user(user: schema_user):
-    return Local_Impl().create_user(user)
+    return LocalImpl().create_user(user)
+
+
+@router_local.get("/getmessages")
+async def get_messages(only_unread: bool, request: Request):
+    return LocalImpl().get_messages(only_unread, request)
+
+
+@router_local.post("/setmessagesread")
+async def set_messages_read(request: Request, message_id: int):
+    return LocalImpl().set_messages_read(request, message_id)

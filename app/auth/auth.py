@@ -9,13 +9,13 @@ from sqlalchemy.orm import Session
 from app.config.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 from app.models.user import User
 from app.schemas.token_data import TokenData
-from app.gear.local.local_impl import Local_Impl
+from app.gear.local.local_impl import LocalImpl
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 def get_user(username: str) -> User:
-    return Local_Impl().get_user_by_username(username=username)
+    return LocalImpl().get_user_by_username(username=username)
 
 
 def authenticate_user(db: Session, username: str, password: str) -> bool:
@@ -30,16 +30,13 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
 
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-    # TODO: Agregar logger
-    print("jwt.decode(encoded_jwt): ")
-    print(jwt.decode(encoded_jwt, SECRET_KEY))
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
     return encoded_jwt
 
