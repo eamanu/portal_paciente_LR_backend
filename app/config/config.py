@@ -11,5 +11,11 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 # e.g. mysql+pymysql://root:root@127.0.0.1:3306/portal_paciente_LR
 
 # Whitelisted Paths
-WHITE_LIST_PATH = ("/portalpaciente/api/v1/login", "/docs", "/openapi.json", "/favicon.ico", "/")
-
+WHITE_LIST_PATH = (
+    "/portalpaciente/api/v1/login",
+    "/portalpaciente/api/v1/logout",
+    "/docs",
+    "/openapi.json",
+    "/favicon.ico",
+    "/",
+)

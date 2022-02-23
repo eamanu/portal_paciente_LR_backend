@@ -9,7 +9,9 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
-CREATE DATABASE `portal_paciente_LR` /*!40100 DEFAULT CHARACTER SET latin1 COLLATE latin1_spanish_ci */;
+/* CREATE DATABASE IF NOT EXISTS `portal_paciente_LR`;*/
+
+/* GRANT ALL ON `portal_paciente_LR`.* TO 'root'@'%';*/
 
 DROP TABLE IF EXISTS `category`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;

@@ -1,16 +1,20 @@
 from datetime import datetime
+
 from fastapi import Depends, HTTPException, Request, status
-from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import JWTError, jwt
+from sqlalchemy.orm import Session
+
 from app.config.config import SECRET_KEY, ALGORITHM
-from app.main import get_db
 from app.gear.local.local_impl import LocalImpl
-from typing import Dict
+from app.main import get_db
 from app.routes import auth
 from app.routes.common import router_local
 from app.schemas.token import Token
 from app.schemas.user import User as schema_user
+
+
+oauth_schema = OAuth2PasswordBearer(tokenUrl="/login")
 
 
 @router_local.post("/login", response_model=Token)
@@ -20,7 +24,7 @@ async def login_for_access_token(db: Session = Depends(get_db),
 
 
 @router_local.post("/logout")
-async def logout(token: Token):
+async def logout(token: str = Depends(oauth_schema)):
 
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -29,14 +33,12 @@ async def logout(token: Token):
     )
 
     try:
-        payload = jwt.decode(token.access_token, SECRET_KEY, algorithms=[ALGORITHM])
-
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         expires = datetime.fromtimestamp(payload.get("exp"))
-
         if expires is None:
             raise credentials_exception
-
         LocalImpl().set_expiration_black_list(token)
+        return {"msg": "good bye"}
 
     except JWTError:
         raise credentials_exception
