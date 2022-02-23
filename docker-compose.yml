@@ -3,8 +3,11 @@ services:
   mysql:
     image: mariadb:latest 
     container_name: portal_pacientes_db
-    env_file:
-      - .env_database
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: portal_paciente_LR
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
     restart: always
     ports:
       - 3306:3306

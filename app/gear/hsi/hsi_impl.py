@@ -9,7 +9,6 @@ from app.gear.hsi.hsi_token import HSIToken
 
 class HSI_Impl:
     def __init__(self):
-
         self.token = HSIToken().connect().token
 
     # region General
