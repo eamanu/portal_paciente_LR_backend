@@ -14,17 +14,10 @@ class User(Base):
     id_person = Column(Integer, nullable=False)
     id_user_status = Column(Integer, nullable=False)
 
-    """
-    @property
-    def password(self):
-        raise AttributeError("password: write-only field")
-
-
-    @password.setter
-    def password(self, password):
+    @staticmethod
+    def encrypt_pwd(password):
         salt = bcrypt.gensalt()
-        self.password = bcrypt.hashpw(password.encode('utf8'), salt)
-    """
+        return bcrypt.hashpw(password.encode(), salt).decode('utf8')
 
     def check_password(self, password):
         return bcrypt.checkpw(password.encode("utf8"), self.password.encode("utf8"))
@@ -33,6 +26,6 @@ class User(Base):
         self, username: str, password: str, id_person: int, id_user_status: int
     ):
         self.username = username
-        self.password = password
+        self.password = self.encrypt_pwd(password)
         self.id_person = id_person
         self.id_user_status = id_user_status
