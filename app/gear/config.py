@@ -31,3 +31,4 @@ HCE_ACTIVE_PROBLEMS = API_BASE + "/institutions/{institutionId}/patient/{patient
 HCE_VITAL_SIGNS = API_BASE + "/institutions/{institutionId}/patient/{patientId}/hce/general-state/vitalSigns"
 
 # endregion
+

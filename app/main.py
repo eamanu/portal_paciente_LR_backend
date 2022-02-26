@@ -4,8 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config.database import SessionLocal
 from app.gear.local.local_impl import LocalImpl
 
+# region Dependency
 
-# Dependency
 def get_db():
     try:
         db = SessionLocal()
@@ -13,16 +13,18 @@ def get_db():
     finally:
         db.close()
 
+# endregion
+
 
 from app.routes.hsi import hsi
 from app.routes.local import local
-
 
 app = FastAPI(title="Portal del paciente",
               description="Interfaz de programación para exponer información relativa al paciente.",
               version="0.0.1")
 
-# CORS
+# region CORS
+
 origins = ["*"]
 
 app.add_middleware(
@@ -33,8 +35,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# endregion
+
 app.include_router(hsi.router_hsi)
 app.include_router(local.router_local)
+
 
 @app.middleware("http")
 async def filter_request_for_authorization(request: Request, call_next):

@@ -19,17 +19,31 @@ from app.models.user import User as model_user
 from app.models.user_message import UserMessage as model_user_message
 from app.schemas.user import User as schema_user
 
+from app.gear.log.main_logger import MainLogger, logging
+
 
 class LocalImpl:
+
     db: Session = SessionLocal()
 
+    log = MainLogger()
+    module = logging.getLogger(__name__)
+
     async def filter_request_for_authorization(self, request: Request, call_next):
+
         if request.scope["path"] not in WHITE_LIST_PATH:
+
             auth_token = request.headers.get("Authorization")
             bearer_token = BearerToken(auth_token)
 
             # Verificación de existencia del token y de que sea válido...
             if auth_token is None or self.is_token_expired(bearer_token):
+
+                if bearer_token.payload is not None:
+                    self.log.log_error_message("Non valid token, expired or not provided for " + bearer_token.payload.get("sub"), self.module)
+                else:
+                    self.log.log_error_message("Non valid token, expired or not provided.", self.module)
+
                 return Response(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     content="Non valid token, expired or not provided.",
@@ -38,6 +52,10 @@ class LocalImpl:
             if not self.is_user_authorized(
                 request.scope["path"], request.scope["method"], bearer_token.payload
             ):
+                self.log.log_error_message(
+                    "Request not authorized for current for " + bearer_token.payload.get("sub"),
+                    self.module)
+
                 return Response(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     content="Request not authorized for current user.",
@@ -47,18 +65,27 @@ class LocalImpl:
         return response
 
     def get_users(self):
-        value = self.db.query(model_user).fetchall()
+        try:
+            value = self.db.query(model_user).fetchall()
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
         return value
 
     def create_user(self, user: schema_user):
-        new_user = model_user(**user.dict())
-        self.db.add(new_user)
-        self.db.commit()
-        value = self.db.query(model_user).where(model_user.id == new_user.id).first()
+        try:
+            new_user = model_user(**user.dict())
+            self.db.add(new_user)
+            self.db.commit()
+            value = self.db.query(model_user).where(model_user.id == new_user.id).first()
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
         return value
 
     def get_user_by_id(self, user_id: int):
-        value = self.db.query(model_user).where(model_user.id == user_id).first()
+        try:
+            value = self.db.query(model_user).where(model_user.id == user_id).first()
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
         return value
 
     def get_user_by_username(self, username: str):
@@ -67,54 +94,74 @@ class LocalImpl:
                 self.db.query(model_user).where(model_user.username == username).first()
             )
             return value
-        except PendingRollbackError as err:
-            # TODO: change print for logg
-            print(err)
+        except PendingRollbackError as e:
+            # change print for logg
+            #print(err)
+            self.log.log_error_message(str(e) + " [" + username + "]", self.module)
             self.db.rollback()
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
             return ""
 
     def delete_user(self, user_id: str):
-        old_user = self.db.query(model_user).where(model_user.id == user_id).first()
-        self.db.delete(old_user)
-        self.db.commit()
+        try:
+            old_user = self.db.query(model_user).where(model_user.id == user_id).first()
+            self.db.delete(old_user)
+            self.db.commit()
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
         return old_user
 
     def is_token_black_listed(self, token: str) -> bool:
-        where_cond = model_expiration_black_list.token == token
-        return bool(
-            self.db.query(model_expiration_black_list).where(where_cond).first()
-        )
+        try:
+            where_cond = model_expiration_black_list.token == token
+            return bool(
+                self.db.query(model_expiration_black_list).where(where_cond).first()
+            )
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
+        return False
 
     def set_expiration_black_list(self, token: str) -> None:
-        expiration_black_list = model_expiration_black_list(
-            register_datetime=datetime.now(), token=token
-        )
-        self.db.add(expiration_black_list)
-        self.db.commit()
+        try:
+            expiration_black_list = model_expiration_black_list(
+                register_datetime=datetime.now(), token=token
+            )
+            self.db.add(expiration_black_list)
+            self.db.commit()
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
 
     def delete_old_tokens(self):
-        timestamp = datetime.now() - timedelta(days=1)
+        try:
+            timestamp = datetime.now() - timedelta(days=1)
 
-        expiration_black_list_elements = (
-            self.db.query(model_expiration_black_list)
-            .where(model_expiration_black_list.register_datetime < timestamp)
-            .all()
-        )
+            expiration_black_list_elements = (
+                self.db.query(model_expiration_black_list)
+                .where(model_expiration_black_list.register_datetime < timestamp)
+                .all()
+            )
 
-        for e in expiration_black_list_elements:
-            self.db.delete(e)
+            for e in expiration_black_list_elements:
+                self.db.delete(e)
 
-        self.db.commit()
+            self.db.commit()
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
+            return True
+
 
     def is_token_expired(self, bearer_token: BearerToken) -> bool:
         try:
             payload = bearer_token.payload
         except JWTError as err:
             # cambiar a logger
-            print(err)
+            #print(err)
+            self.log.log_error_message(str(err) + " [" + str(bearer_token) + "]", self.module)
             return True
 
         if payload is None or self.is_token_black_listed(bearer_token.token):
+            self.log.log_error_message("Non existent payload or token is in black list.", self.module)
             return True
 
         is_expired = bearer_token.is_expired
@@ -125,42 +172,55 @@ class LocalImpl:
 
     @staticmethod
     def is_user_authorized(path: str, method: str, payload: Optional[dict]) -> bool:
-        # just in case check if payload is None
-        if payload is None:
+        try:
+            if payload is None:
+                return False
+            username = payload.get("sub")
+            return Permission.user_is_authorized(username, path, method)
+        except Exception as e:
+            MainLogger().log_error_message(e, logging.getLogger(__name__))
             return False
-        username = payload.get("sub")
-        return Permission.user_is_authorized(username, path, method)
+
 
     def get_messages(self, only_unread: bool, request: Request):
-        bearer_token = BearerToken(request.headers.get("Authorization"))
-        username = bearer_token.payload.get("sub")
+        try:
+            bearer_token = BearerToken(request.headers.get("Authorization"))
+            username = bearer_token.payload.get("sub")
 
-        messages = (
-            self.db.query(model_message, model_user_message.read_datetime)
-            .join(model_user_message, model_user_message.id_message == model_message.id)
-            .join(model_user, model_user.id == model_user_message.id_user)
-            .where(model_user_message.read_datetime is None if only_unread else True)
-            .where(model_user.username == username)
-            .all()
-        )
+            messages = (
+                self.db.query(model_message, model_user_message.read_datetime)
+                .join(model_user_message, model_user_message.id_message == model_message.id)
+                .join(model_user, model_user.id == model_user_message.id_user)
+                .where(model_user_message.read_datetime is None if only_unread else True)
+                .where(model_user.username == username)
+                .all()
+            )
 
-        return messages
+            return messages
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
+
 
     def set_messages_read(self, request: Request, message_id: int):
-        bearer_token = BearerToken(request.headers.get("Authorization"))
-        username = bearer_token.payload.get("sub")
+        try:
+            bearer_token = BearerToken(request.headers.get("Authorization"))
+            username = bearer_token.payload.get("sub")
 
-        user_message = (
-            self.db.query(model_user_message)
-            .join(
-                model_user,
-                model_user_message.id_user == model_user.id
-                and model_user_message.id_message == message_id
-                and model_user.username == username,
+            user_message = (
+                self.db.query(model_user_message)
+                .join(
+                    model_user,
+                    model_user_message.id_user == model_user.id
+                    and model_user_message.id_message == message_id
+                    and model_user.username == username,
+                )
+                .first()
             )
-            .first()
-        )
 
-        user_message.read_datetime = datetime.now()
+            user_message.read_datetime = datetime.now()
 
-        self.db.commit()
+            self.db.commit()
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
+            return True
+
