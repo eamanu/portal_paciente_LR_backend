@@ -21,12 +21,22 @@ services:
       - 8080:8080
 
   app:
-    build: .
+    # build: .
+    image: eamanu/portal_paciente:dev
     container_name: portal_pacientes_app
     env_file:
       - .env_backend
     restart: always
     depends_on:
       - mysql
+    ports:
+      - 8000:8000
+
+  frontend:
+    image: eamanu/portal_paciente_frontend:prod
+    container_name: portal_pacientes_frontend
+    restart: always
+    depends_on:
+      - app
     ports:
       - 80:80
