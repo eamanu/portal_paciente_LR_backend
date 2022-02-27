@@ -11,7 +11,12 @@ from app.models.user import User
 from app.schemas.token_data import TokenData
 from app.gear.local.local_impl import LocalImpl
 
+from app.gear.log.main_logger import MainLogger, logging
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+log = MainLogger()
+module = logging.getLogger(__name__)
 
 
 def get_user(username: str) -> User:
@@ -51,11 +56,14 @@ async def get_current_user(db: Session, token: str = Depends(oauth2_scheme)):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
+            log.log_error_message("Non specified user.", module)
             raise credentials_exception
         token_data = TokenData(username=username)
-    except JWTError:
+    except JWTError as e:
+        log.log_error_message(str(e) + " [" + str(token_data.username) + "]", module)
         raise credentials_exception
     user = get_user(db, username=token_data.username)
     if user is None:
+        log.log_error_message("Non existent user " + str(token_data.username), module)
         raise credentials_exception
     return user
