@@ -5,16 +5,6 @@ on:
     branches: [ main ]
 
 jobs:
-
-  build:
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag eamanu/portal_paciente:$(date +%s)
-      
   push_to_registry:
     name: "[Backend] Push Docker image to Docker Hub"
     runs-on: ubuntu-latest
