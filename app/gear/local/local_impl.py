@@ -33,9 +33,11 @@ class LocalImpl:
         if request.method == "OPTIONS":
             return Response(
                 status_code=status.HTTP_204_NO_CONTENT,
+                # should be added to database ?
                 headers={
                     "Access-Control-Allow-Origin": "*",
                     "Access-Control-Allow-Methods": "POST, GET, OPTIONS, DELETE",
+                    "Access-Control-Max-Age": "86400",
                 }
             )
 
