@@ -30,6 +30,10 @@ class LocalImpl:
     module = logging.getLogger(__name__)
 
     async def filter_request_for_authorization(self, request: Request, call_next):
+        if request.method == "OPTIONS":
+            return Response(
+                status_code=status.HTTP_204_NO_CONTENT
+            )
 
         if request.scope["path"] not in WHITE_LIST_PATH:
 
