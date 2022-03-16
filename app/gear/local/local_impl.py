@@ -32,7 +32,11 @@ class LocalImpl:
     async def filter_request_for_authorization(self, request: Request, call_next):
         if request.method == "OPTIONS":
             return Response(
-                status_code=status.HTTP_204_NO_CONTENT
+                status_code=status.HTTP_204_NO_CONTENT,
+                headers={
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "POST, GET, OPTIONS, DELETE",
+                }
             )
 
         if request.scope["path"] not in WHITE_LIST_PATH:
@@ -44,9 +48,15 @@ class LocalImpl:
             if auth_token is None or self.is_token_expired(bearer_token):
 
                 if bearer_token.payload is not None:
-                    self.log.log_error_message("Non valid token, expired or not provided for " + bearer_token.payload.get("sub"), self.module)
+                    self.log.log_error_message(
+                        "Non valid token, expired or not provided for "
+                        + bearer_token.payload.get("sub"),
+                        self.module,
+                    )
                 else:
-                    self.log.log_error_message("Non valid token, expired or not provided.", self.module)
+                    self.log.log_error_message(
+                        "Non valid token, expired or not provided.", self.module
+                    )
 
                 return Response(
                     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -57,8 +67,10 @@ class LocalImpl:
                 request.scope["path"], request.scope["method"], bearer_token.payload
             ):
                 self.log.log_error_message(
-                    "Request not authorized for current for " + bearer_token.payload.get("sub"),
-                    self.module)
+                    "Request not authorized for current for "
+                    + bearer_token.payload.get("sub"),
+                    self.module,
+                )
 
                 return Response(
                     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -80,7 +92,9 @@ class LocalImpl:
             new_user = model_user(**user.dict())
             self.db.add(new_user)
             self.db.commit()
-            value = self.db.query(model_user).where(model_user.id == new_user.id).first()
+            value = (
+                self.db.query(model_user).where(model_user.id == new_user.id).first()
+            )
         except Exception as e:
             self.log.log_error_message(e, self.module)
         return value
@@ -100,7 +114,7 @@ class LocalImpl:
             return value
         except PendingRollbackError as e:
             # change print for logg
-            #print(err)
+            # print(err)
             self.log.log_error_message(str(e) + " [" + username + "]", self.module)
             self.db.rollback()
         except Exception as e:
@@ -154,18 +168,21 @@ class LocalImpl:
             self.log.log_error_message(e, self.module)
             return True
 
-
     def is_token_expired(self, bearer_token: BearerToken) -> bool:
         try:
             payload = bearer_token.payload
         except JWTError as err:
             # cambiar a logger
-            #print(err)
-            self.log.log_error_message(str(err) + " [" + str(bearer_token) + "]", self.module)
+            # print(err)
+            self.log.log_error_message(
+                str(err) + " [" + str(bearer_token) + "]", self.module
+            )
             return True
 
         if payload is None or self.is_token_black_listed(bearer_token.token):
-            self.log.log_error_message("Non existent payload or token is in black list.", self.module)
+            self.log.log_error_message(
+                "Non existent payload or token is in black list.", self.module
+            )
             return True
 
         is_expired = bearer_token.is_expired
@@ -185,7 +202,6 @@ class LocalImpl:
             MainLogger().log_error_message(e, logging.getLogger(__name__))
             return False
 
-
     def get_messages(self, only_unread: bool, request: Request):
         try:
             bearer_token = BearerToken(request.headers.get("Authorization"))
@@ -193,9 +209,14 @@ class LocalImpl:
 
             messages = (
                 self.db.query(model_message, model_user_message.read_datetime)
-                .join(model_user_message, model_user_message.id_message == model_message.id)
+                .join(
+                    model_user_message,
+                    model_user_message.id_message == model_message.id,
+                )
                 .join(model_user, model_user.id == model_user_message.id_user)
-                .where(model_user_message.read_datetime is None if only_unread else True)
+                .where(
+                    model_user_message.read_datetime is None if only_unread else True
+                )
                 .where(model_user.username == username)
                 .all()
             )
@@ -203,7 +224,6 @@ class LocalImpl:
             return messages
         except Exception as e:
             self.log.log_error_message(e, self.module)
-
 
     def set_messages_read(self, request: Request, message_id: int):
         try:
@@ -227,4 +247,3 @@ class LocalImpl:
         except Exception as e:
             self.log.log_error_message(e, self.module)
             return True
-
