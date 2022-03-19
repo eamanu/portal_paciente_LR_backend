@@ -23,8 +23,12 @@ def get_user(username: str) -> Optional[User]:
     # For some issue we need some attemps before failed
     # we need to made a research to understand why get_user_by_username
     # fail with a Exception in ASGI application
-    for i in range(10):
-        return LocalImpl().get_user_by_username(username=username)
+    log.log_info_message("getting user", module)
+    for attemp in range(10):
+        log.log_info_message(f"getting user, attempt: {attemp}", module)
+        user = LocalImpl().get_user_by_username(username=username)
+        if user is not None:
+            return user
     return None
 
 
