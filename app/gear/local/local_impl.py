@@ -111,18 +111,15 @@ class LocalImpl:
 
     def get_user_by_username(self, username: str):
         try:
-            value = (
-                self.db.query(model_user).where(model_user.username == username).first()
-            )
+            value = self.db.query(model_user).where(model_user.username == username).first()
             return value
         except PendingRollbackError as e:
-            # change print for logg
-            # print(err)
             self.log.log_error_message(str(e) + " [" + username + "]", self.module)
             self.db.rollback()
+            return None
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            return ""
+            return None
 
     def delete_user(self, user_id: str):
         try:
