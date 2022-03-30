@@ -1,3 +1,4 @@
+alembic==1.7.7
 anyio==3.4.0
 asgiref==3.4.1
 attrs==21.2.0
@@ -21,6 +22,7 @@ itsdangerous==2.0.1
 jedi==0.18.1
 Jinja2==3.0.3
 jose==1.0.0
+Mako==1.2.0
 MarkupSafe==2.0.1
 msgpack==1.0.3
 neovim==0.3.1
@@ -28,6 +30,7 @@ orjson==3.6.4
 packaging==21.3
 parso==0.8.2
 pluggy==1.0.0
+psycopg2-binary==2.9.3
 py==1.11.0
 pyasn1==0.4.8
 pycparser==2.21
