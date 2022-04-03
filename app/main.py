@@ -18,6 +18,7 @@ def get_db():
 
 from app.routes.hsi import hsi
 from app.routes.local import local
+from app.routes.local import admin
 
 app = FastAPI(title="Portal del paciente",
               description="Interfaz de programación para exponer información relativa al paciente.",
@@ -39,6 +40,8 @@ app.add_middleware(
 
 app.include_router(hsi.router_hsi)
 app.include_router(local.router_local)
+app.include_router(admin.router_admin)
+
 
 
 @app.middleware("http")

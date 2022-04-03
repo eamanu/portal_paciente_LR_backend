@@ -14,3 +14,9 @@ router_local = APIRouter(
     responses={404: {"description": "Not Found"}}
 )
 
+router_admin = APIRouter(
+    tags=["Admin"],
+    prefix="/portalpaciente/api/v1/admin",
+    responses={404: {"description": "Not Found"}}
+)
+
