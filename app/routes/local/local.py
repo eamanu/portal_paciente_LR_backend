@@ -60,5 +60,5 @@ async def set_messages_read(request: Request, message_id: int):
     return LocalImpl().set_messages_read(request, message_id)
 
 @router_local.post("/createperson")
-async def create_user(person: schema_person):
+async def create_person(person: schema_person):
     return LocalImpl().create_person(person)
