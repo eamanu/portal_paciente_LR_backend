@@ -21,6 +21,7 @@ class Permission(Base):
     @staticmethod
     def user_is_authorized(username: str, path: str, method: str) -> bool:
         db = SessionLocal()
+        debug = True
 
         permissions = db.query(Permission) \
             .join(RolePermission, RolePermission.id == RolePermission.id_permission) \
@@ -32,5 +33,15 @@ class Permission(Base):
             patterns = [permission.url]
             pattern = '(?:% s)' % '|'.join(patterns)
             if re.match(pattern, path) and permission.method.upper() == method.upper():
+
+                if debug:
+                    print("---------------------------")
+                    print(permission.name)
+                    print(permission.url)
+                    print(path)
+                    print(permission.method)
+                    print(method)
+                    print("---------------------------")
+
                 return True
         return False

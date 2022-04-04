@@ -32,6 +32,9 @@ class LocalImpl:
     module = logging.getLogger(__name__)
 
     async def filter_request_for_authorization(self, request: Request, call_next):
+
+        print(vars(request))
+
         if request.method == "OPTIONS":
             return Response(
                 status_code=status.HTTP_204_NO_CONTENT,
@@ -72,7 +75,7 @@ class LocalImpl:
                 request.scope["path"], request.scope["method"], bearer_token.payload
             ):
                 self.log.log_error_message(
-                    "Request not authorized for current for "
+                    "Request not authorized for user "
                     + bearer_token.payload.get("sub"),
                     self.module,
                 )
