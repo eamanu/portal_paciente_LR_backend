@@ -12,6 +12,7 @@ from app.routes import auth
 from app.routes.common import router_local
 from app.schemas.token import Token
 from app.schemas.user import User as schema_user
+from app.schemas.person import Person as schema_person
 
 
 oauth_schema = OAuth2PasswordBearer(tokenUrl="/login")
@@ -57,3 +58,7 @@ async def get_messages(only_unread: bool, request: Request):
 @router_local.post("/setmessagesread")
 async def set_messages_read(request: Request, message_id: int):
     return LocalImpl().set_messages_read(request, message_id)
+
+@router_local.post("/createperson")
+async def create_user(person: schema_person):
+    return LocalImpl().create_person(person)

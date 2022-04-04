@@ -17,7 +17,9 @@ from app.models.message import Message as model_message
 from app.models.permission import Permission
 from app.models.user import User as model_user
 from app.models.user_message import UserMessage as model_user_message
+from app.models.person import Person as model_person
 from app.schemas.user import User as schema_user
+from app.schemas.person import Person as schema_person
 
 from app.gear.log.main_logger import MainLogger, logging
 
@@ -247,3 +249,15 @@ class LocalImpl:
         except Exception as e:
             self.log.log_error_message(e, self.module)
             return True
+
+    def create_person(self, person: schema_person):
+        try:
+            new_person = model_person(**person.dict())
+            self.db.add(new_person)
+            self.db.commit()
+            value = (
+                self.db.query(model_user).where(model_user.id == new_person.id).first()
+            )
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
+        return value

@@ -159,6 +159,10 @@ INSERT INTO `permission` (`id`, `name`, `url`, `method`) VALUES (17,'Complete Da
 INSERT INTO `permission` (`id`, `name`, `url`, `method`) VALUES (18,'Create User','/portalpaciente/api/v1/createuser','POST');
 INSERT INTO `permission` (`id`, `name`, `url`, `method`) VALUES (19,'Get Messages','/portalpaciente/api/v1/getmessages','GET');
 INSERT INTO `permission` (`id`, `name`, `url`, `method`) VALUES (20,'Set Messages Read','/portalpaciente/api/v1/setmessagesread','POST');
+INSERT INTO `permission` (`id`, `name`, `url`, `method`) VALUES (21,'Create Person','/portalpaciente/api/v1/createperson','POST');
+
+
+
 /*!40000 ALTER TABLE `permission` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -171,11 +175,21 @@ DROP TABLE IF EXISTS `person`;
  SET character_set_client = utf8mb4 ;
 CREATE TABLE `person` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `name` varchar(500) COLLATE latin1_spanish_ci DEFAULT NULL,
-  `surname` varchar(500) COLLATE latin1_spanish_ci DEFAULT NULL,
+  `name` varchar(100) COLLATE latin1_spanish_ci DEFAULT NULL,
+  `surname` varchar(100) COLLATE latin1_spanish_ci DEFAULT NULL,
+  `identification_number` varchar(100) COLLATE latin1_spanish_ci DEFAULT NULL,
   `birthdate` date DEFAULT NULL,
-  `id_identification_type` bigint(20) DEFAULT NULL,
-  `identification_number` varchar(50) COLLATE latin1_spanish_ci DEFAULT NULL,
+  `id_gender` bigint(20) DEFAULT NULL,
+  `id_department` bigint(20) DEFAULT NULL,
+  `id_locality` bigint(20) DEFAULT NULL,
+  `address_street` varchar(250) COLLATE latin1_spanish_ci DEFAULT NULL,
+  `address_number` varchar(100) COLLATE latin1_spanish_ci DEFAULT NULL,
+  `id_usual_institution` bigint(20) DEFAULT NULL,
+  `is_diabetic` tinyint DEFAULT NULL,
+  `is_hypertensive` tinyint DEFAULT NULL,
+  `is_chronic_respiratory_disease` tinyint DEFAULT NULL,
+  `is_chronic_kidney_disease` tinyint DEFAULT NULL,
+  `identification_number_master` varchar(100) COLLATE latin1_spanish_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -186,10 +200,10 @@ CREATE TABLE `person` (
 
 LOCK TABLES `person` WRITE;
 /*!40000 ALTER TABLE `person` DISABLE KEYS */;
-INSERT INTO `person` (`id`, `name`, `surname`, `birthdate`, `id_identification_type`, `identification_number`) VALUES (1,'Administrador','Administrador','1970-01-01',1,'1054201');
-INSERT INTO `person` (`id`, `name`, `surname`, `birthdate`, `id_identification_type`, `identification_number`) VALUES (2,'Emmanuel','Arias','1990-01-01',1,'31045285');
-INSERT INTO `person` (`id`, `name`, `surname`, `birthdate`, `id_identification_type`, `identification_number`) VALUES (3,'Osvaldo','Ocanto','1979-01-01',1,'27543642');
-INSERT INTO `person` (`id`, `name`, `surname`, `birthdate`, `id_identification_type`, `identification_number`) VALUES (4,'Ernesto','Sábato','1950-01-01',1,'4545609');
+INSERT INTO `person` (`id`, `name`, `surname`, `birthdate`, `identification_number`) VALUES (1,'Administrador','Administrador','1970-01-01','1054201');
+INSERT INTO `person` (`id`, `name`, `surname`, `birthdate`, `identification_number`) VALUES (2,'Emmanuel','Arias','1990-01-01','31045285');
+INSERT INTO `person` (`id`, `name`, `surname`, `birthdate`, `identification_number`) VALUES (3,'Osvaldo','Ocanto','1979-01-01','27543642');
+INSERT INTO `person` (`id`, `name`, `surname`, `birthdate`, `identification_number`) VALUES (4,'Ernesto','Sábato','1950-01-01','4545609');
 /*!40000 ALTER TABLE `person` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -264,6 +278,7 @@ INSERT INTO `role_permission` (`id`, `id_permission`, `id_role`) VALUES (21,15,1
 INSERT INTO `role_permission` (`id`, `id_permission`, `id_role`) VALUES (22,16,1);
 INSERT INTO `role_permission` (`id`, `id_permission`, `id_role`) VALUES (23,17,1);
 INSERT INTO `role_permission` (`id`, `id_permission`, `id_role`) VALUES (24,18,1);
+INSERT INTO `role_permission` (`id`, `id_permission`, `id_role`) VALUES (25,21,1);
 /*!40000 ALTER TABLE `role_permission` ENABLE KEYS */;
 UNLOCK TABLES;
 
