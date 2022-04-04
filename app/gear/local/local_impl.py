@@ -256,7 +256,7 @@ class LocalImpl:
             self.db.add(new_person)
             self.db.commit()
             value = (
-                self.db.query(model_user).where(model_user.id == new_person.id).first()
+                self.db.query(model_person).where(model_person.id == new_person.id).first()
             )
         except Exception as e:
             self.log.log_error_message(e, self.module)
