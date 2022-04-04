@@ -59,6 +59,33 @@ async def get_messages(only_unread: bool, request: Request):
 async def set_messages_read(request: Request, message_id: int):
     return LocalImpl().set_messages_read(request, message_id)
 
+
 @router_local.post("/createperson")
 async def create_person(person: schema_person):
     return LocalImpl().create_person(person)
+
+
+@router_local.put("/updateperson")
+async def update_person(person: schema_person):
+    return LocalImpl().update_person(person)
+
+
+@router_local.put("/deleteperson")
+async def delete_person(person_id: int):
+    return LocalImpl().delete_person(person_id)
+
+
+@router_local.get("/getpersonbyid")
+async def get_person_by_id(person_id: int):
+    return LocalImpl().get_person_by_id(person_id)
+
+
+@router_local.get("/getpersonbyidentificationnumber")
+async def get_person_by_identification_number(person_identification_number: str):
+    return LocalImpl().get_person_by_identification_number(person_identification_number)
+
+
+@router_local.put("/setadminstatustoperson")
+async def set_admin_status_to_person(person_id: int, admin_status_id: int):
+    return LocalImpl().set_admin_status_to_person(person_id, admin_status_id)
+

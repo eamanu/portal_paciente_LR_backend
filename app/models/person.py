@@ -27,14 +27,17 @@ class Person(Base):
     identification_number_master = Column(String(100), nullable=False)
     id_identification_type = Column(Integer, nullable=True)
     id_identification_type_master = Column(Integer, nullable=True)
-
+    is_deleted = Column(Boolean, nullable=False)
+    id_patient = Column(Integer, nullable=True)
+    id_admin_status = Column(Integer, nullable=True)
 
     def __init__(
-        self, surname: str, name: str, identification_number: str, birthdate: datetime, id_gender: int,
+        self, id: int, surname: str, name: str, identification_number: str, birthdate: datetime, id_gender: int,
             id_department: int, id_locality: int, address_street: str, address_number: str, id_usual_institution: int,
             is_diabetic: bool, is_hypertensive: bool, is_chronic_respiratory_disease: bool,
             is_chronic_kidney_disease: bool, identification_number_master: str, id_identification_type: int,
-            id_identification_type_master: int):
+            id_identification_type_master: int, is_deleted: bool, id_patient: int, id_admin_status: int):
+        self.id = id
         self.surname = surname
         self.name = name
         self.identification_number = identification_number
@@ -52,3 +55,6 @@ class Person(Base):
         self.identification_number_master = identification_number_master
         self.id_identification_type = id_identification_type
         self.id_identification_type_master = id_identification_type_master
+        self.is_deleted = is_deleted
+        self.id_patient = id_patient
+        self.id_admin_status = id_admin_status

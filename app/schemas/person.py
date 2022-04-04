@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 class Person(BaseModel):
-    # id: Optional[int]
+    id: Optional[int]
     surname: Optional[str]
     name: Optional[str]
     identification_number: Optional[str]
@@ -22,4 +22,7 @@ class Person(BaseModel):
     identification_number_master: Optional[str]
     id_identification_type: Optional[int]
     id_identification_type_master: Optional[int]
+    is_deleted: Optional[bool]
+    id_patient: Optional[int]
+    id_admin_status: Optional[int]
 

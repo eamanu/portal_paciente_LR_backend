@@ -33,7 +33,7 @@ class LocalImpl:
 
     async def filter_request_for_authorization(self, request: Request, call_next):
 
-        print(vars(request))
+        # print(vars(request))
 
         if request.method == "OPTIONS":
             return Response(
@@ -254,6 +254,7 @@ class LocalImpl:
             return True
 
     def create_person(self, person: schema_person):
+
         try:
             new_person = model_person(**person.dict())
             self.db.add(new_person)
@@ -264,3 +265,92 @@ class LocalImpl:
         except Exception as e:
             self.log.log_error_message(e, self.module)
         return value
+
+    def update_person(self, person: schema_person):
+
+        try:
+            updated_person = model_person(**person.dict())
+
+            existing_person = (
+                self.db.query(model_person)
+                    .where(model_person.id == updated_person.id)
+                    .first()
+            )
+
+            existing_person.surname = updated_person.surname
+            existing_person.name = updated_person.name
+            existing_person.identification_number = updated_person.identification_number
+            existing_person.birthdate = updated_person.birthdate
+            existing_person.id_gender = updated_person.id_gender
+            existing_person.id_department = updated_person.id_department
+            existing_person.id_locality = updated_person.id_locality
+            existing_person.address_street = updated_person.address_street
+            existing_person.address_number = updated_person.address_number
+            existing_person.id_usual_institution = updated_person.id_usual_institution
+            existing_person.is_diabetic = updated_person.is_diabetic
+            existing_person.is_hypertensive = updated_person.is_hypertensive
+            existing_person.is_chronic_respiratory_disease = updated_person.is_chronic_respiratory_disease
+            existing_person.is_chronic_kidney_disease = updated_person.is_chronic_kidney_disease
+            existing_person.identification_number_master = updated_person.identification_number_master
+            existing_person.id_identification_type = updated_person.id_identification_type
+            existing_person.id_identification_type_master = updated_person.id_identification_type_master
+            existing_person.is_deleted = updated_person.is_deleted
+            existing_person.id_patient = updated_person.id_patient
+            existing_person.id_admin_status = updated_person.id_admin_status
+
+            self.db.commit()
+            value = (
+                self.db.query(model_person).where(model_person.id == existing_person.id).first()
+            )
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
+        return value
+
+    def delete_person(self, person_id: int):
+        try:
+            old_person = self.db.query(model_person).where(model_person.id == person_id).first()
+            old_person.is_deleted = None
+            self.db.commit()
+            old_person.is_deleted = True
+            self.db.commit()
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
+        return old_person
+
+    def get_person_by_id(self, person_id: int):
+
+        return self.get_person(person_id, None, True)
+
+    def get_person_by_identification_number(self, person_identification_number: str):
+
+        return self.get_person(0, person_identification_number, False)
+
+    def get_person(self, person_id: int, person_identification_number: str, is_by_id: bool):
+
+        try:
+
+            if is_by_id:
+                existing_person = self.db.query(model_person).where(model_person.id == person_id).first()
+            else:
+                existing_person = self.db.query(model_person).where(
+                    model_person.identification_number == person_identification_number).first()
+
+            family_group = self.db.query(model_person).where(
+                model_person.identification_number_master == existing_person.identification_number).all()
+
+            if family_group != "[]":
+                existing_person.family_group = family_group
+
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
+
+        return existing_person
+
+    def set_admin_status_to_person(self, person_id: int, admin_status_id: int):
+        try:
+            existing_person = self.db.query(model_person).where(model_person.id == person_id).first()
+            existing_person.id_admin_status = admin_status_id
+            self.db.commit()
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
+        return existing_person
