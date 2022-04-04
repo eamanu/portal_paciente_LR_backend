@@ -25,13 +25,16 @@ class Person(Base):
     is_chronic_respiratory_disease = Column(Boolean, nullable=False)
     is_chronic_kidney_disease = Column(Boolean, nullable=False)
     identification_number_master = Column(String(100), nullable=False)
+    id_identification_type = Column(Integer, nullable=True)
+    id_identification_type_master = Column(Integer, nullable=True)
 
 
     def __init__(
         self, surname: str, name: str, identification_number: str, birthdate: datetime, id_gender: int,
             id_department: int, id_locality: int, address_street: str, address_number: str, id_usual_institution: int,
             is_diabetic: bool, is_hypertensive: bool, is_chronic_respiratory_disease: bool,
-            is_chronic_kidney_disease: bool, identification_number_master: str):
+            is_chronic_kidney_disease: bool, identification_number_master: str, id_identification_type: int,
+            id_identification_type_master: int):
         self.surname = surname
         self.name = name
         self.identification_number = identification_number
@@ -47,3 +50,5 @@ class Person(Base):
         self.is_chronic_respiratory_disease = is_chronic_respiratory_disease
         self.is_chronic_kidney_disease = is_chronic_kidney_disease
         self.identification_number_master = identification_number_master
+        self.id_identification_type = id_identification_type
+        self.id_identification_type_master = id_identification_type_master

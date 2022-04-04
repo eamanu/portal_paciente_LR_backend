@@ -20,4 +20,6 @@ class Person(BaseModel):
     is_chronic_respiratory_disease: Optional[bool]
     is_chronic_kidney_disease: Optional[bool]
     identification_number_master: Optional[str]
+    id_identification_type: Optional[int]
+    id_identification_type_master: Optional[int]
 
