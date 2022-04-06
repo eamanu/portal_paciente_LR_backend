@@ -25,4 +25,8 @@ class Person(BaseModel):
     is_deleted: Optional[bool]
     id_patient: Optional[int]
     id_admin_status: Optional[int]
+    phone_number: Optional[str]
+    department: Optional[str]
+    locality: Optional[str]
+    email: Optional[str]
 

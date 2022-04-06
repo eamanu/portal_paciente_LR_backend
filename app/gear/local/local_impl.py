@@ -297,6 +297,10 @@ class LocalImpl:
             existing_person.is_deleted = updated_person.is_deleted
             existing_person.id_patient = updated_person.id_patient
             existing_person.id_admin_status = updated_person.id_admin_status
+            existing_person.phone_number = updated_person.phone_number
+            existing_person.department = updated_person.department
+            existing_person.locality = updated_person.locality
+            existing_person.email = updated_person.email
 
             self.db.commit()
             value = (

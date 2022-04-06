@@ -30,13 +30,18 @@ class Person(Base):
     is_deleted = Column(Boolean, nullable=False)
     id_patient = Column(Integer, nullable=True)
     id_admin_status = Column(Integer, nullable=True)
+    phone_number = Column(String(100), nullable=False)
+    department = Column(String(200), nullable=False)
+    locality = Column(String(200), nullable=False)
+    email = Column(String(200), nullable=False)
 
     def __init__(
         self, id: int, surname: str, name: str, identification_number: str, birthdate: datetime, id_gender: int,
             id_department: int, id_locality: int, address_street: str, address_number: str, id_usual_institution: int,
             is_diabetic: bool, is_hypertensive: bool, is_chronic_respiratory_disease: bool,
             is_chronic_kidney_disease: bool, identification_number_master: str, id_identification_type: int,
-            id_identification_type_master: int, is_deleted: bool, id_patient: int, id_admin_status: int):
+            id_identification_type_master: int, is_deleted: bool, id_patient: int, id_admin_status: int,
+            phone_number: str, department:str, locality: str, email: str):
         self.id = id
         self.surname = surname
         self.name = name
@@ -58,3 +63,7 @@ class Person(Base):
         self.is_deleted = is_deleted
         self.id_patient = id_patient
         self.id_admin_status = id_admin_status
+        self.phone_number = phone_number
+        self.department = department
+        self.locality = locality
+        self.email = email
