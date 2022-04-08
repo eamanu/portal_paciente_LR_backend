@@ -7,7 +7,7 @@ from jose.exceptions import JWTError
 from sqlalchemy.exc import PendingRollbackError
 from sqlalchemy.orm import Session
 
-from app.config.config import WHITE_LIST_PATH
+from app.config.config import WHITE_LIST_PATH, AUTHORIZATION_ENABLED, DEBUG_ENABLED
 from app.config.database import SessionLocal
 from app.gear.local.bearer_token import BearerToken
 from app.models.expiration_black_list import (
@@ -20,6 +20,7 @@ from app.models.user_message import UserMessage as model_user_message
 from app.models.person import Person as model_person
 from app.schemas.user import User as schema_user
 from app.schemas.person import Person as schema_person
+from app.schemas.person_user import PersonUser as schema_person_user
 
 from app.gear.log.main_logger import MainLogger, logging
 
@@ -33,7 +34,8 @@ class LocalImpl:
 
     async def filter_request_for_authorization(self, request: Request, call_next):
 
-        # print(vars(request))
+        if DEBUG_ENABLED:
+            print(vars(request))
 
         if request.method == "OPTIONS":
             return Response(
@@ -47,7 +49,7 @@ class LocalImpl:
                 }
             )
 
-        if request.scope["path"] not in WHITE_LIST_PATH:
+        if request.scope["path"] not in WHITE_LIST_PATH and AUTHORIZATION_ENABLED:
 
             auth_token = request.headers.get("Authorization")
             bearer_token = BearerToken(auth_token)
@@ -86,6 +88,7 @@ class LocalImpl:
                 )
 
         response = await call_next(request)
+
         return response
 
     def get_users(self):
@@ -257,6 +260,7 @@ class LocalImpl:
 
         try:
             new_person = model_person(**person.dict())
+
             self.db.add(new_person)
             self.db.commit()
             value = (
@@ -358,3 +362,59 @@ class LocalImpl:
         except Exception as e:
             self.log.log_error_message(e, self.module)
         return existing_person
+
+
+    def create_person_and_user(self, person_user: schema_person_user):
+
+        try:
+
+            new_person = model_person(None,
+            person_user.surname,
+            person_user.name,
+            person_user.identification_number,
+            person_user.birthdate,
+            person_user.id_gender,
+            person_user.id_department,
+            person_user.id_locality,
+            person_user.address_street,
+            person_user.address_number,
+            person_user.id_usual_institution,
+            person_user.is_diabetic,
+            person_user.is_hypertensive,
+            person_user.is_chronic_respiratory_disease,
+            person_user.is_chronic_kidney_disease,
+            person_user.identification_number_master,
+            person_user.id_identification_type,
+            person_user.id_identification_type_master,
+            person_user.is_deleted,
+            person_user.id_patient,
+            person_user.id_admin_status,
+            person_user.phone_number,
+            person_user.department,
+            person_user.locality,
+            person_user.email)
+
+            self.db.add(new_person)
+            self.db.commit()
+
+            value = (
+                self.db.query(model_person).where(model_person.id == new_person.id).first()
+            )
+
+            new_user = model_user(person_user.username,
+            person_user.password,
+            value.id,
+            person_user.id_user_status)
+
+            self.db.add(new_user)
+            self.db.commit()
+
+            value = (
+                self.db.query(model_user).where(model_user.id == new_user.id).first()
+            )
+
+            value.password = None
+
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
+        return value
