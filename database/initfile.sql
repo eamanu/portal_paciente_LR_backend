@@ -199,6 +199,10 @@ CREATE TABLE `person` (
   `id_identification_type_master` bigint(20) DEFAULT NULL,
   `is_deleted` tinyint DEFAULT NULL,
   `id_patient` bigint(20) DEFAULT NULL,
+  `phone_number` varchar(100) COLLATE latin1_spanish_ci DEFAULT NULL,
+  `department` varchar(200) COLLATE latin1_spanish_ci DEFAULT NULL,
+  `locality` varchar(200) COLLATE latin1_spanish_ci DEFAULT NULL,
+  `email` varchar(200) COLLATE latin1_spanish_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;

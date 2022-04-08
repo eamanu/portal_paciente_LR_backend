@@ -36,3 +36,9 @@ LOG_PATH = './app.log'
 
 # endregion
 
+# region Operational mode
+
+DEBUG_ENABLED = False
+AUTHORIZATION_ENABLED = False
+
+# endregion

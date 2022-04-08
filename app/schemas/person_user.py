@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from datetime import datetime
 
 
-class Person(BaseModel):
+class PersonUser(BaseModel):
     id: Optional[int]
     surname: Optional[str]
     name: Optional[str]
@@ -29,4 +29,10 @@ class Person(BaseModel):
     department: Optional[str]
     locality: Optional[str]
     email: Optional[str]
-
+    #####################
+    # User
+    #####################
+    username: Optional[str]
+    password: Optional[str]
+    id_person: Optional[int]
+    id_user_status: Optional[int]

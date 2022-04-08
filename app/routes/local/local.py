@@ -13,6 +13,7 @@ from app.routes.common import router_local
 from app.schemas.token import Token
 from app.schemas.user import User as schema_user
 from app.schemas.person import Person as schema_person
+from app.schemas.person_user import PersonUser as schema_person_user
 
 
 oauth_schema = OAuth2PasswordBearer(tokenUrl="/login")
@@ -89,3 +90,12 @@ async def get_person_by_identification_number(person_identification_number: str)
 async def set_admin_status_to_person(person_id: int, admin_status_id: int):
     return LocalImpl().set_admin_status_to_person(person_id, admin_status_id)
 
+
+@router_local.put("/setadminstatustoperson")
+async def set_admin_status_to_person(person_id: int, admin_status_id: int):
+    return LocalImpl().set_admin_status_to_person(person_id, admin_status_id)
+
+
+@router_local.post("/createpersonanduser")
+async def create_person_and_user(person_user: schema_person_user):
+    return LocalImpl().create_person_and_user(person_user)

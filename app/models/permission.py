@@ -2,11 +2,13 @@ import re
 
 from sqlalchemy import Column, Integer, String
 
+from app.config.config import DEBUG_ENABLED
 from app.config.database import Base
 from app.config.database import SessionLocal
 from app.models.role_permission import RolePermission
 from app.models.user import User
 from app.models.user_role import UserRole
+
 
 
 class Permission(Base):
@@ -34,7 +36,7 @@ class Permission(Base):
             pattern = '(?:% s)' % '|'.join(patterns)
             if re.match(pattern, path) and permission.method.upper() == method.upper():
 
-                if debug:
+                if DEBUG_ENABLED:
                     print("---------------------------")
                     print(permission.name)
                     print(permission.url)
@@ -44,4 +46,5 @@ class Permission(Base):
                     print("---------------------------")
 
                 return True
+
         return False
