@@ -409,13 +409,6 @@ class LocalImpl:
 
             self.db.add(new_user)
             self.db.commit()
-
-            value = (
-                self.db.query(model_user).where(model_user.id == new_user.id).first()
-            )
-
-            value.password = None
-
         except Exception as e:
-            self.log.log_error_message(e, self.module)
-        return value
+            return {"message": "Error, person not created", "code": 202}
+        return {"message": "Person Create successfully", "code": 201}
