@@ -11,8 +11,8 @@ class User(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(100), nullable=False)
     password = Column(String(500), nullable=False)
-    id_person = Column(Integer, nullable=False)
-    id_user_status = Column(Integer, nullable=False)
+    id_person = Column(Integer, nullable=True)
+    id_user_status = Column(Integer, nullable=True)
 
     @staticmethod
     def encrypt_pwd(password):
