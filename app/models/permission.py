@@ -23,7 +23,6 @@ class Permission(Base):
     @staticmethod
     def user_is_authorized(username: str, path: str, method: str) -> bool:
         db = SessionLocal()
-        debug = False
 
         permissions = db.query(Permission) \
             .join(RolePermission, RolePermission.id == RolePermission.id_permission) \
