@@ -49,7 +49,7 @@ class LocalImpl:
                 }
             )
 
-        if request.scope["path"] not in WHITE_LIST_PATH and AUTHORIZATION_ENABLED:
+        if AUTHORIZATION_ENABLED and (request.scope["path"] not in WHITE_LIST_PATH):
 
             auth_token = request.headers.get("Authorization")
             bearer_token = BearerToken(auth_token)
@@ -268,7 +268,8 @@ class LocalImpl:
             )
         except Exception as e:
             self.log.log_error_message(e, self.module)
-        return value
+            return {"message": "Error, user not created", "code": 202}
+        return {"message": "Person Create successfully", "code": 201}
 
     def update_person(self, person: schema_person):
 
