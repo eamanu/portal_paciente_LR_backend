@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from datetime import datetime
 
 
@@ -30,3 +30,9 @@ class Person(BaseModel):
     locality: Optional[str]
     email: Optional[str]
 
+    @validator("birthdate", pre=True)
+    def parse_birthdate(cls, value):
+        return datetime.strptime(
+            value,
+            "%d/%m/%Y"
+        )

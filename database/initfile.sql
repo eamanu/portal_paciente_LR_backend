@@ -199,6 +199,7 @@ CREATE TABLE `person` (
   `id_identification_type_master` bigint(20) DEFAULT NULL,
   `is_deleted` tinyint DEFAULT NULL,
   `id_patient` bigint(20) DEFAULT NULL,
+  `id_admin_status` tinyint DEFAULT NULL,
   `phone_number` varchar(100) COLLATE latin1_spanish_ci DEFAULT NULL,
   `department` varchar(200) COLLATE latin1_spanish_ci DEFAULT NULL,
   `locality` varchar(200) COLLATE latin1_spanish_ci DEFAULT NULL,
