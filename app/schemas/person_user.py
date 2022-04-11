@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from datetime import datetime
 
 
@@ -36,3 +36,11 @@ class PersonUser(BaseModel):
     password: Optional[str]
     id_person: Optional[int]
     id_user_status: Optional[int]
+
+    @validator("birthdate", pre=True)
+    def parse_birthdate(cls, value):
+        return datetime.strptime(
+            value,
+            "%d/%m/%Y"
+        )
+
