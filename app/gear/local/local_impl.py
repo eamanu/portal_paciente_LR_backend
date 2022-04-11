@@ -268,7 +268,7 @@ class LocalImpl:
             )
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            return {"message": "Error, user not created", "code": 202}
+            return {"message": "Error, person not created", "code": 202}
         return {"message": "Person Create successfully", "code": 201}
 
     def update_person(self, person: schema_person):

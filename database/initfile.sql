@@ -310,10 +310,10 @@ DROP TABLE IF EXISTS `user`;
  SET character_set_client = utf8mb4 ;
 CREATE TABLE `user` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `username` varchar(100) COLLATE latin1_spanish_ci NOT NULL,
-  `password` varchar(500) COLLATE latin1_spanish_ci NOT NULL DEFAULT '',
-  `id_person` bigint(20) NOT NULL,
-  `id_user_status` bigint(20) NOT NULL,
+  `username` varchar(100) COLLATE latin1_spanish_ci NULL,
+  `password` varchar(500) COLLATE latin1_spanish_ci NULL DEFAULT '',
+  `id_person` bigint(20) NULL,
+  `id_user_status` bigint(20) NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
