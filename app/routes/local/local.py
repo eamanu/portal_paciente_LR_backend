@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from fastapi import Depends, HTTPException, Request, status
+from fastapi import Depends, HTTPException, Request, status, File, UploadFile
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
@@ -99,3 +99,7 @@ async def set_admin_status_to_person(person_id: int, admin_status_id: int):
 @router_local.post("/createpersonanduser")
 async def create_person_and_user(person_user: schema_person_user):
     return LocalImpl().create_person_and_user(person_user)
+
+@router_local.post("/uploadidentificationimages")
+async def upload_identification_images(person_id: str, file: UploadFile = File(...), file2: UploadFile = File(...)):
+    return LocalImpl().upload_identification_images(person_id, file, file2)

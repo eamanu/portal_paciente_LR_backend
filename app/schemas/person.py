@@ -29,6 +29,9 @@ class Person(BaseModel):
     department: Optional[str]
     locality: Optional[str]
     email: Optional[str]
+    identification_front_image: Optional[str]
+    identification_back_image: Optional[str]
+
 
     @validator("birthdate", pre=True)
     def parse_birthdate(cls, value):

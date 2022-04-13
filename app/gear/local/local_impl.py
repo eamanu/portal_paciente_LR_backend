@@ -1,13 +1,15 @@
 from datetime import datetime, timedelta
 from typing import Optional
 
-from fastapi import Request, status
+from fastapi import Request, status, File, UploadFile
 from fastapi.responses import Response
 from jose.exceptions import JWTError
 from sqlalchemy.exc import PendingRollbackError
 from sqlalchemy.orm import Session
+import aiofiles
+import base64
 
-from app.config.config import WHITE_LIST_PATH, AUTHORIZATION_ENABLED, DEBUG_ENABLED
+from app.config.config import WHITE_LIST_PATH, AUTHORIZATION_ENABLED, DEBUG_ENABLED, LOCAL_FILE_UPLOAD_DIRECTORY
 from app.config.database import SessionLocal
 from app.gear.local.bearer_token import BearerToken
 from app.models.expiration_black_list import (
@@ -413,3 +415,63 @@ class LocalImpl:
         except Exception as e:
             return {"message": "Error, person not created", "code": 202}
         return {"message": "Person Create successfully", "code": 201}
+
+    async def upload_identification_images(self, person_id: str, file: UploadFile = File(...), file2: UploadFile = File(...)):
+
+        # File 1
+        b64_string_file1 = ""
+        b64_string_file2 = ""
+
+        print("ESTOY ACÁ...")
+
+        try:
+
+            # File 1 ------------------------------------------------------------------------------------
+            destination_file_path = LOCAL_FILE_UPLOAD_DIRECTORY + file.filename  # location to store file
+            async with aiofiles.open(destination_file_path, 'wb') as out_file:
+                while True:
+                    c = file.read(1024) # async read file chunk
+                    if not c:
+                        break
+
+                    out_file.write(c)  # async write file chunk
+
+                with open(destination_file_path, "rb") as bin_file:
+                    b64_string_file1 = base64.b64encode(bin_file.read())
+
+            # File 2 ------------------------------------------------------------------------------------
+            destination_file_path = LOCAL_FILE_UPLOAD_DIRECTORY + file2.filename  # location to store file
+            async with aiofiles.open(destination_file_path, 'wb') as out_file:
+                while True:
+                    c = file2.read(1024)  # async read file chunk
+                    if not c:
+                        break
+
+                    out_file.write(c)  # async write file chunk
+
+                with open(destination_file_path, "rb") as bin_file:
+                    b64_string_file2 = base64.b64encode(bin_file.read())
+
+
+            print("#######################################################")
+            print(person_id)
+            print(b64_string_file1)
+            print(b64_string_file2)
+            print("#######################################################")
+
+            # Saving process -----------------------------------------------------------------------------
+            existing_person = (
+                self.db.query(model_person)
+                    .where(model_person.id == person_id)
+                    .first()
+            )
+
+            existing_person.identification_front_image = b64_string_file1
+            existing_person.identification_back_image = b64_string_file2
+
+            self.db.commit()
+
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
+
+        return {"Result": "OK"}

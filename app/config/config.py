@@ -42,3 +42,9 @@ DEBUG_ENABLED = False
 AUTHORIZATION_ENABLED = False
 
 # endregion
+
+# region File configurations
+
+LOCAL_FILE_UPLOAD_DIRECTORY = "/tmp/"
+
+# endregion
