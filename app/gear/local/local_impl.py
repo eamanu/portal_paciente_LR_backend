@@ -37,6 +37,7 @@ class LocalImpl:
         if DEBUG_ENABLED:
             print(vars(request))
 
+        """
         if request.method == "OPTIONS":
             return Response(
                 status_code=status.HTTP_204_NO_CONTENT,
@@ -49,7 +50,7 @@ class LocalImpl:
                     "Content-type": "application/json"
                 }
             )
-
+        """
         if AUTHORIZATION_ENABLED and (request.scope["path"] not in WHITE_LIST_PATH):
 
             auth_token = request.headers.get("Authorization")
