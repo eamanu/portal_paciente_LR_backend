@@ -37,6 +37,7 @@ class LocalImpl:
         if DEBUG_ENABLED:
             print(vars(request))
 
+        # TODO: Check if this is necessary:
         """
         if request.method == "OPTIONS":
             return Response(
