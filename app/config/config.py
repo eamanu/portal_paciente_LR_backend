@@ -45,6 +45,6 @@ AUTHORIZATION_ENABLED = False
 
 # region File configurations
 
-LOCAL_FILE_UPLOAD_DIRECTORY = "/tmp/"
+LOCAL_FILE_UPLOAD_DIRECTORY = "/home/oocanto/tmp/"
 
 # endregion

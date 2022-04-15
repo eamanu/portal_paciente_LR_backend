@@ -416,9 +416,10 @@ class LocalImpl:
             return {"message": "Error, person not created", "code": 202}
         return {"message": "Person Create successfully", "code": 201}
 
-    async def upload_identification_images(self, person_id: str, file: UploadFile = File(...), file2: UploadFile = File(...)):
 
-        # File 1
+    async def upload_identification_images(self, person_id: str, file: UploadFile = File(...),
+                                           file2: UploadFile = File(...)):
+
         b64_string_file1 = ""
         b64_string_file2 = ""
 
@@ -428,35 +429,32 @@ class LocalImpl:
 
             # File 1 ------------------------------------------------------------------------------------
             destination_file_path = LOCAL_FILE_UPLOAD_DIRECTORY + file.filename  # location to store file
-            async with aiofiles.open(destination_file_path, 'wb') as out_file:
-                while True:
-                    c = file.read(1024) # async read file chunk
-                    if not c:
-                        break
 
-                    out_file.write(c)  # async write file chunk
+            file_a = open(destination_file_path, "wb+")
 
-                with open(destination_file_path, "rb") as bin_file:
-                    b64_string_file1 = base64.b64encode(bin_file.read())
+            file_a.write(await file.read())
+
+            file_a.close()
+
+            with open(destination_file_path, "rb") as bin_file:
+                b64_string_file1 = base64.b64encode(bin_file.read())
 
             # File 2 ------------------------------------------------------------------------------------
             destination_file_path = LOCAL_FILE_UPLOAD_DIRECTORY + file2.filename  # location to store file
-            async with aiofiles.open(destination_file_path, 'wb') as out_file:
-                while True:
-                    c = file2.read(1024)  # async read file chunk
-                    if not c:
-                        break
 
-                    out_file.write(c)  # async write file chunk
+            file_b = open(destination_file_path, "wb+")
 
-                with open(destination_file_path, "rb") as bin_file:
-                    b64_string_file2 = base64.b64encode(bin_file.read())
+            file_b.write(await file2.read())
 
+            file_b.close()
+
+            with open(destination_file_path, "rb") as bin_file:
+                b64_string_file2 = base64.b64encode(bin_file.read())
 
             print("#######################################################")
             print(person_id)
-            print(b64_string_file1)
-            print(b64_string_file2)
+            print(len(b64_string_file1))
+            print(len(b64_string_file2))
             print("#######################################################")
 
             # Saving process -----------------------------------------------------------------------------
@@ -473,5 +471,7 @@ class LocalImpl:
 
         except Exception as e:
             self.log.log_error_message(e, self.module)
+            print(e)
 
+        print("ESTOY ACÁ FINALIZANDO...")
         return {"Result": "OK"}
