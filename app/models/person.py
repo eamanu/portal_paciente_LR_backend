@@ -35,10 +35,6 @@ class Person(Base):
     locality = Column(String(200), nullable=False)
     email = Column(String(200), nullable=False)
 
-    def __init__(self):
-        print("HolaHolaHolaHolaHolaHolaHolaHolaHolaHolaHolaHolaHolaHolaHolaHola")
-
-
     def __init__(
         self, id: int, surname: str, name: str, identification_number: str, birthdate: datetime, id_gender: int,
             id_department: int, id_locality: int, address_street: str, address_number: str, id_usual_institution: int,

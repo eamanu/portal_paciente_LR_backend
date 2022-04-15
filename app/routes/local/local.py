@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
@@ -10,18 +11,21 @@ from app.gear.local.local_impl import LocalImpl
 from app.main import get_db
 from app.routes import auth
 from app.routes.common import router_local
-from app.schemas.token import Token
-from app.schemas.user import User as schema_user
+from app.schemas.message import ReadMessage
 from app.schemas.person import Person as schema_person
 from app.schemas.person_user import PersonUser as schema_person_user
+from app.schemas.responses import ResponseOK, ResponseNOK
+from app.schemas.token import Token
+from app.schemas.user import User as schema_user
 
 
 oauth_schema = OAuth2PasswordBearer(tokenUrl="/login")
 
 
 @router_local.post("/login", response_model=Token)
-async def login_for_access_token(db: Session = Depends(get_db),
-                                 form_data: OAuth2PasswordRequestForm = Depends()):
+async def login_for_access_token(
+    db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()
+):
     return auth.login_for_access_token(db, form_data)
 
 
@@ -46,32 +50,50 @@ async def logout(token: str = Depends(oauth_schema)):
         raise credentials_exception
 
 
-@router_local.post("/createuser")
+@router_local.post(
+    "/createuser", response_model=ResponseOK, responses={417: {"model": ResponseNOK}}
+)
 async def create_user(user: schema_user):
     return LocalImpl().create_user(user)
 
 
-@router_local.get("/getmessages")
+@router_local.get(
+    "/getmessages",
+    response_model=List[ReadMessage],
+    responses={417: {"model": ResponseNOK}},
+)
 async def get_messages(only_unread: bool, request: Request):
     return LocalImpl().get_messages(only_unread, request)
 
 
-@router_local.post("/setmessagesread")
+@router_local.post(
+    "/setmessagesread",
+    response_model=ResponseOK,
+    responses={417: {"model": ResponseNOK}},
+)
 async def set_messages_read(request: Request, message_id: int):
     return LocalImpl().set_messages_read(request, message_id)
 
 
-@router_local.post("/createperson")
+@router_local.post(
+    "/createperson", response_model=ResponseOK, responses={417: {"model": ResponseNOK}}
+)
 async def create_person(person: schema_person):
     return LocalImpl().create_person(person)
 
 
-@router_local.put("/updateperson")
+@router_local.put(
+    "/updateperson",
+    response_model=schema_person,
+    responses={417: {"model": ResponseNOK}},
+)
 async def update_person(person: schema_person):
     return LocalImpl().update_person(person)
 
 
-@router_local.put("/deleteperson")
+@router_local.put(
+    "/deleteperson", response_model=ResponseOK, responses={417: {"model": ResponseNOK}}
+)
 async def delete_person(person_id: int):
     return LocalImpl().delete_person(person_id)
 
@@ -86,16 +108,19 @@ async def get_person_by_identification_number(person_identification_number: str)
     return LocalImpl().get_person_by_identification_number(person_identification_number)
 
 
-@router_local.put("/setadminstatustoperson")
+@router_local.put(
+    "/setadminstatustoperson",
+    response_model=schema_person,
+    responses={417: {"model": ResponseNOK}},
+)
 async def set_admin_status_to_person(person_id: int, admin_status_id: int):
     return LocalImpl().set_admin_status_to_person(person_id, admin_status_id)
 
 
-@router_local.put("/setadminstatustoperson")
-async def set_admin_status_to_person(person_id: int, admin_status_id: int):
-    return LocalImpl().set_admin_status_to_person(person_id, admin_status_id)
-
-
-@router_local.post("/createpersonanduser")
+@router_local.post(
+    "/createpersonanduser",
+    response_model=ResponseOK,
+    responses={202: {"model": ResponseNOK}},
+)
 async def create_person_and_user(person_user: schema_person_user):
     return LocalImpl().create_person_and_user(person_user)

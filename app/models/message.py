@@ -2,8 +2,8 @@ from sqlalchemy import Column, Integer, String, DateTime
 
 from app.config.database import Base
 
-class Message(Base):
 
+class Message(Base):
     __tablename__ = "message"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

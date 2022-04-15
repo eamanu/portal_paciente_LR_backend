@@ -1,9 +1,9 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, DateTime
 
 from app.config.database import Base
 
-class UserMessage(Base):
 
+class UserMessage(Base):
     __tablename__ = "user_message"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
