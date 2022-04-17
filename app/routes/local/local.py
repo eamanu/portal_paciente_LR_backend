@@ -17,28 +17,35 @@ from app.schemas.person_user import PersonUser as schema_person_user
 from app.schemas.responses import ResponseOK, ResponseNOK
 from app.schemas.token import Token
 from app.schemas.user import User as schema_user
+from app.schemas.person import PersonLogged
+from app.schemas.responses import HTTPError
 
 
 oauth_schema = OAuth2PasswordBearer(tokenUrl="/login")
 
 
-@router_local.post("/login", response_model=Token)
+@router_local.post(
+    "/login", response_model=Token, responses={401: {"model": HTTPError}},
+    tags=["Login & Logout"]
+)
 async def login_for_access_token(
     db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()
 ):
     return auth.login_for_access_token(db, form_data)
 
 
-@router_local.post("/login-person")
+@router_local.post(
+    "/login-person", response_model=PersonLogged, responses={401: {"model": HTTPError}},
+    tags=["Login & Logout"]
+)
 async def login_person(
     db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()
 ):
     return auth.login_person(db, form_data)
 
 
-@router_local.post("/logout")
+@router_local.post("/logout", tags=["Login & Logout"])
 async def logout(token: str = Depends(oauth_schema)):
-
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
