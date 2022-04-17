@@ -29,6 +29,13 @@ async def login_for_access_token(
     return auth.login_for_access_token(db, form_data)
 
 
+@router_local.post("/login-person")
+async def login_person(
+    db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()
+):
+    return auth.login_person(db, form_data)
+
+
 @router_local.post("/logout")
 async def logout(token: str = Depends(oauth_schema)):
 

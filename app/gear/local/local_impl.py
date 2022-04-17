@@ -377,12 +377,13 @@ class LocalImpl:
                     )
                     .first()
                 )
+            identification_number = existing_person.identification_number
 
             family_group = (
                 self.db.query(model_person)
                 .where(
                     model_person.identification_number_master
-                    == existing_person.identification_number
+                    == identification_number
                 )
                 .all()
             )
@@ -457,5 +458,5 @@ class LocalImpl:
             self.db.commit()
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            return ResponseNOK("Person cannot be created", 202)
-        return ResponseOK("Person Create successfully", 201)
+            return ResponseNOK(message="Person cannot be created", code=417)
+        return ResponseOK(message="Person Create successfully", code=201)
