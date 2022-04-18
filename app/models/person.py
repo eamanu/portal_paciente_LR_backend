@@ -1,5 +1,5 @@
 import bcrypt
-from sqlalchemy import Column, Integer, String, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text
 from datetime import datetime
 
 from app.config.database import Base
@@ -34,6 +34,8 @@ class Person(Base):
     department = Column(String(200), nullable=False)
     locality = Column(String(200), nullable=False)
     email = Column(String(200), nullable=False)
+    identification_front_image = Column(Text, nullable=False)
+    identification_back_image = Column(Text, nullable=False)
 
     def __init__(
         self, id: int, surname: str, name: str, identification_number: str, birthdate: datetime, id_gender: int,
