@@ -419,14 +419,7 @@ class LocalImpl:
 
     async def upload_identification_images(self, person_id: str, file: UploadFile = File(...),
                                            file2: UploadFile = File(...)):
-
-        b64_string_file1 = ""
-        b64_string_file2 = ""
-
-        print("ESTOY ACÁ...")
-
         try:
-
             # File 1 ------------------------------------------------------------------------------------
             destination_file_path = LOCAL_FILE_UPLOAD_DIRECTORY + file.filename  # location to store file
 
@@ -451,12 +444,6 @@ class LocalImpl:
             with open(destination_file_path, "rb") as bin_file:
                 b64_string_file2 = base64.b64encode(bin_file.read())
 
-            print("#######################################################")
-            print(person_id)
-            print(len(b64_string_file1))
-            print(len(b64_string_file2))
-            print("#######################################################")
-
             # Saving process -----------------------------------------------------------------------------
             existing_person = (
                 self.db.query(model_person)
@@ -471,7 +458,4 @@ class LocalImpl:
 
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            print(e)
-
-        print("ESTOY ACÁ FINALIZANDO...")
         return {"Result": "OK"}

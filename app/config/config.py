@@ -45,6 +45,6 @@ AUTHORIZATION_ENABLED = False
 
 # region File configurations
 
-LOCAL_FILE_UPLOAD_DIRECTORY = "/home/oocanto/tmp/"
+LOCAL_FILE_UPLOAD_DIRECTORY = os.getenv("TMP_FILES_UPLOAD")
 
 # endregion

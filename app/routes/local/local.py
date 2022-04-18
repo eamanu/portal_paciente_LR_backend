@@ -101,6 +101,6 @@ async def create_person_and_user(person_user: schema_person_user):
     return LocalImpl().create_person_and_user(person_user)
 
 
-#@router_local.post("/uploadidentificationimages")
-#async def upload_identification_images(person_id: str, file: UploadFile = File(...), file2: UploadFile = File(...)):
-#    return await LocalImpl().upload_identification_images(person_id, file, file2)
+@router_local.post("/uploadidentificationimages")
+async def upload_identification_images(person_id: str, file: UploadFile = File(...), file2: UploadFile = File(...)):
+    return await LocalImpl().upload_identification_images(person_id, file, file2)

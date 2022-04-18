@@ -6,3 +6,4 @@ CREATE TABLE users (
 
 INSERT INTO users(user_id, password_hash)
     VALUES ('admin', '$2b$12$nW9bzZJggFAyYYI.soU8GurU.0g82ftRBNfn.v9vtIDWmt/RJdgr2')
+

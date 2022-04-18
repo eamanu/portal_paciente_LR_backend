@@ -56,7 +56,7 @@ async def filter_request_for_authorization(request: Request, call_next):
     return await LocalImpl().filter_request_for_authorization(request, call_next)
 
 
-
+"""
 from fastapi import File, UploadFile
 from app.config.config import LOCAL_FILE_UPLOAD_DIRECTORY
 import aiofiles
@@ -110,3 +110,4 @@ async def upload_identification_images(person_id: str, file: UploadFile = File(.
 
     print("ESTOY ACÁ FINALIZANDO...")
     return {"Result": "OK"}
+"""
