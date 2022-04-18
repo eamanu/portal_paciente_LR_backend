@@ -37,7 +37,6 @@ class Person(Base):
     identification_front_image = Column(Text, nullable=False)
     identification_back_image = Column(Text, nullable=False)
 
-
     def __init__(
         self, id: int, surname: str, name: str, identification_number: str, birthdate: datetime, id_gender: int,
             id_department: int, id_locality: int, address_street: str, address_number: str, id_usual_institution: int,

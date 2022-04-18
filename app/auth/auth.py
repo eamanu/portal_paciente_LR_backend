@@ -19,6 +19,8 @@ log = MainLogger()
 module = logging.getLogger(__name__)
 
 
+# TODO: get_user no debería estar en auth.py, debería estar
+# en algún lado más general.
 def get_user(username: str) -> Optional[User]:
     # For some issue we need some attemps before failed
     # we need to made a research to understand why get_user_by_username

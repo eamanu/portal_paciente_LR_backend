@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, Union
 
 from fastapi import Request, status, File, UploadFile
 from fastapi.responses import Response
@@ -12,19 +12,20 @@ import base64
 from app.config.config import WHITE_LIST_PATH, AUTHORIZATION_ENABLED, DEBUG_ENABLED, LOCAL_FILE_UPLOAD_DIRECTORY
 from app.config.database import SessionLocal
 from app.gear.local.bearer_token import BearerToken
+from app.gear.log.main_logger import MainLogger, logging
 from app.models.expiration_black_list import (
     ExpirationBlackList as model_expiration_black_list,
 )
 from app.models.message import Message as model_message
 from app.models.permission import Permission
+from app.models.person import Person as model_person
 from app.models.user import User as model_user
 from app.models.user_message import UserMessage as model_user_message
-from app.models.person import Person as model_person
-from app.schemas.user import User as schema_user
 from app.schemas.person import Person as schema_person
 from app.schemas.person_user import PersonUser as schema_person_user
-
-from app.gear.log.main_logger import MainLogger, logging
+from app.schemas.responses import ResponseNOK, ResponseOK
+from app.schemas.user import User as schema_user
+from app.schemas.message import Message, ReadMessage
 
 
 class LocalImpl:
@@ -39,6 +40,8 @@ class LocalImpl:
         if DEBUG_ENABLED:
             print(vars(request))
 
+        # TODO: Check if this is necessary:
+        """
         if request.method == "OPTIONS":
             return Response(
                 status_code=status.HTTP_204_NO_CONTENT,
@@ -51,7 +54,7 @@ class LocalImpl:
                     "Content-type": "application/json"
                 }
             )
-
+        """
         if AUTHORIZATION_ENABLED and (request.scope["path"] not in WHITE_LIST_PATH):
 
             auth_token = request.headers.get("Authorization")
@@ -99,30 +102,32 @@ class LocalImpl:
             value = self.db.query(model_user).fetchall()
         except Exception as e:
             self.log.log_error_message(e, self.module)
+            return ResponseNOK(message="Error, Users cannot be retrieve", code=417)
         return value
 
-    def create_user(self, user: schema_user):
+    def create_user(self, user: schema_user) -> Union[ResponseOK, ResponseNOK]:
         try:
             new_user = model_user(**user.dict())
             self.db.add(new_user)
             self.db.commit()
-            value = (
-                self.db.query(model_user).where(model_user.id == new_user.id).first()
-            )
         except Exception as e:
             self.log.log_error_message(e, self.module)
-        return value
+            return ResponseNOK(message="Error, User not created", code=417)
+        return ResponseOK(message="User Create successfully", code=201)
 
     def get_user_by_id(self, user_id: int):
         try:
             value = self.db.query(model_user).where(model_user.id == user_id).first()
         except Exception as e:
             self.log.log_error_message(e, self.module)
+            return ResponseNOK(message="Error, User cannot be retrieve", code=202)
         return value
 
     def get_user_by_username(self, username: str):
         try:
-            value = self.db.query(model_user).where(model_user.username == username).first()
+            value = (
+                self.db.query(model_user).where(model_user.username == username).first()
+            )
             return value
         except PendingRollbackError as e:
             self.log.log_error_message(str(e) + " [" + username + "]", self.module)
@@ -139,7 +144,8 @@ class LocalImpl:
             self.db.commit()
         except Exception as e:
             self.log.log_error_message(e, self.module)
-        return old_user
+            return ResponseNOK(message="Error, User cannot be deleted", code=417)
+        return ResponseOK(message="User deleted successfully", code=201)
 
     def is_token_black_listed(self, token: str) -> bool:
         try:
@@ -183,8 +189,6 @@ class LocalImpl:
         try:
             payload = bearer_token.payload
         except JWTError as err:
-            # cambiar a logger
-            # print(err)
             self.log.log_error_message(
                 str(err) + " [" + str(bearer_token) + "]", self.module
             )
@@ -232,9 +236,14 @@ class LocalImpl:
                 .all()
             )
 
-            return messages
+            result = []
+            for message, read_time in messages:
+                message_schema = Message.from_orm(message)
+                read_message = ReadMessage(message=message_schema, read_datetime=read_time)
+                result.append(read_message)
         except Exception as e:
             self.log.log_error_message(e, self.module)
+            return ResponseNOK(message=f"Error: {str(e)}", code=417)
 
     def set_messages_read(self, request: Request, message_id: int):
         try:
@@ -255,34 +264,31 @@ class LocalImpl:
             user_message.read_datetime = datetime.now()
 
             self.db.commit()
+            return ResponseOK(message="Message set read successfully", code=201)
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            return True
+            return ResponseNOK(message=f"Error: {str(e)}", code=417)
 
     def create_person(self, person: schema_person):
-
         try:
             new_person = model_person(**person.dict())
 
             self.db.add(new_person)
             self.db.commit()
-            value = (
-                self.db.query(model_person).where(model_person.id == new_person.id).first()
-            )
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            return {"message": "Error, person not created", "code": 202}
-        return {"message": "Person Create successfully", "code": 201}
+            return ResponseNOK(message="Error, person not created", code=417)
+        return ResponseOK(message="Person Create successfully", code=201)
 
-    def update_person(self, person: schema_person):
+    def update_person(self, person: schema_person) -> Union[schema_person, ResponseNOK]:
 
         try:
             updated_person = model_person(**person.dict())
 
             existing_person = (
                 self.db.query(model_person)
-                    .where(model_person.id == updated_person.id)
-                    .first()
+                .where(model_person.id == updated_person.id)
+                .first()
             )
 
             existing_person.surname = updated_person.surname
@@ -297,11 +303,21 @@ class LocalImpl:
             existing_person.id_usual_institution = updated_person.id_usual_institution
             existing_person.is_diabetic = updated_person.is_diabetic
             existing_person.is_hypertensive = updated_person.is_hypertensive
-            existing_person.is_chronic_respiratory_disease = updated_person.is_chronic_respiratory_disease
-            existing_person.is_chronic_kidney_disease = updated_person.is_chronic_kidney_disease
-            existing_person.identification_number_master = updated_person.identification_number_master
-            existing_person.id_identification_type = updated_person.id_identification_type
-            existing_person.id_identification_type_master = updated_person.id_identification_type_master
+            existing_person.is_chronic_respiratory_disease = (
+                updated_person.is_chronic_respiratory_disease
+            )
+            existing_person.is_chronic_kidney_disease = (
+                updated_person.is_chronic_kidney_disease
+            )
+            existing_person.identification_number_master = (
+                updated_person.identification_number_master
+            )
+            existing_person.id_identification_type = (
+                updated_person.id_identification_type
+            )
+            existing_person.id_identification_type_master = (
+                updated_person.id_identification_type_master
+            )
             existing_person.is_deleted = updated_person.is_deleted
             existing_person.id_patient = updated_person.id_patient
             existing_person.id_admin_status = updated_person.id_admin_status
@@ -312,109 +328,139 @@ class LocalImpl:
 
             self.db.commit()
             value = (
-                self.db.query(model_person).where(model_person.id == existing_person.id).first()
+                self.db.query(model_person)
+                .where(model_person.id == existing_person.id)
+                .first()
             )
         except Exception as e:
             self.log.log_error_message(e, self.module)
-        return value
+            return ResponseNOK(message="Error, User not created", code=417)
+        return schema_person.from_orm(value)
 
     def delete_person(self, person_id: int):
         try:
-            old_person = self.db.query(model_person).where(model_person.id == person_id).first()
+            old_person = (
+                self.db.query(model_person).where(model_person.id == person_id).first()
+            )
             old_person.is_deleted = None
             self.db.commit()
             old_person.is_deleted = True
             self.db.commit()
         except Exception as e:
             self.log.log_error_message(e, self.module)
-        return old_person
+            return ResponseNOK(message="Error, Person cannot be deleted", code=417)
+        return ResponseOK(message="Person deleted successfully", code=201)
 
     def get_person_by_id(self, person_id: int):
-
         return self.get_person(person_id, None, True)
 
     def get_person_by_identification_number(self, person_identification_number: str):
-
         return self.get_person(0, person_identification_number, False)
 
-    def get_person(self, person_id: int, person_identification_number: str, is_by_id: bool):
-
+    def get_person(
+        self,
+        person_id: int,
+        person_identification_number: Optional[str],
+        is_by_id: bool,
+    ):
         try:
-
             if is_by_id:
-                existing_person = self.db.query(model_person).where(model_person.id == person_id).first()
+                existing_person = (
+                    self.db.query(model_person)
+                    .where(model_person.id == person_id)
+                    .first()
+                )
             else:
-                existing_person = self.db.query(model_person).where(
-                    model_person.identification_number == person_identification_number).first()
+                existing_person = (
+                    self.db.query(model_person)
+                    .where(
+                        model_person.identification_number
+                        == person_identification_number
+                    )
+                    .first()
+                )
+            identification_number = existing_person.identification_number
 
-            family_group = self.db.query(model_person).where(
-                model_person.identification_number_master == existing_person.identification_number).all()
+            family_group = (
+                self.db.query(model_person)
+                .where(
+                    model_person.identification_number_master
+                    == identification_number
+                )
+                .all()
+            )
 
             if family_group != "[]":
                 existing_person.family_group = family_group
 
         except Exception as e:
             self.log.log_error_message(e, self.module)
-
+            return ResponseNOK(message=f"Person cannot be retrieve. Error: {str(e)}", code=417)
         return existing_person
 
     def set_admin_status_to_person(self, person_id: int, admin_status_id: int):
         try:
-            existing_person = self.db.query(model_person).where(model_person.id == person_id).first()
+            existing_person = (
+                self.db.query(model_person).where(model_person.id == person_id).first()
+            )
             existing_person.id_admin_status = admin_status_id
             self.db.commit()
         except Exception as e:
             self.log.log_error_message(e, self.module)
-        return existing_person
-
+            return ResponseNOK(message=f"Person cannot be updated. Error: {str(e)}", code=417)
+        return schema_person.from_orm(existing_person)
 
     def create_person_and_user(self, person_user: schema_person_user):
-
         try:
-
-            new_person = model_person(None,
-            person_user.surname,
-            person_user.name,
-            person_user.identification_number,
-            person_user.birthdate,
-            person_user.id_gender,
-            person_user.id_department,
-            person_user.id_locality,
-            person_user.address_street,
-            person_user.address_number,
-            person_user.id_usual_institution,
-            person_user.is_diabetic,
-            person_user.is_hypertensive,
-            person_user.is_chronic_respiratory_disease,
-            person_user.is_chronic_kidney_disease,
-            person_user.identification_number_master,
-            person_user.id_identification_type,
-            person_user.id_identification_type_master,
-            person_user.is_deleted,
-            person_user.id_patient,
-            person_user.id_admin_status,
-            person_user.phone_number,
-            person_user.department,
-            person_user.locality,
-            person_user.email)
+            new_person = model_person(
+                None,
+                person_user.surname,
+                person_user.name,
+                person_user.identification_number,
+                person_user.birthdate,
+                person_user.id_gender,
+                person_user.id_department,
+                person_user.id_locality,
+                person_user.address_street,
+                person_user.address_number,
+                person_user.id_usual_institution,
+                person_user.is_diabetic,
+                person_user.is_hypertensive,
+                person_user.is_chronic_respiratory_disease,
+                person_user.is_chronic_kidney_disease,
+                person_user.identification_number_master,
+                person_user.id_identification_type,
+                person_user.id_identification_type_master,
+                person_user.is_deleted,
+                person_user.id_patient,
+                person_user.id_admin_status,
+                person_user.phone_number,
+                person_user.department,
+                person_user.locality,
+                person_user.email,
+            )
 
             self.db.add(new_person)
             self.db.commit()
 
             value = (
-                self.db.query(model_person).where(model_person.id == new_person.id).first()
+                self.db.query(model_person)
+                .where(model_person.id == new_person.id)
+                .first()
             )
 
-            new_user = model_user(person_user.username,
-            person_user.password,
-            value.id,
-            person_user.id_user_status)
+            new_user = model_user(
+                person_user.username,
+                person_user.password,
+                value.id,
+                person_user.id_user_status,
+            )
 
             self.db.add(new_user)
             self.db.commit()
         except Exception as e:
-            return {"message": "Error, person not created", "code": 202}
-        return {"message": "Person Create successfully", "code": 201}
+            return ResponseNOK(message="Person cannot be created", code=417)
+        return ResponseOK(message="Person Create successfully", code=201)
 
 
     async def upload_identification_images(self, person_id: str, file: UploadFile = File(...),
@@ -458,4 +504,5 @@ class LocalImpl:
 
         except Exception as e:
             self.log.log_error_message(e, self.module)
-        return {"Result": "OK"}
+            return ResponseNOK(message=f"Error: {str(e)}", code=417)
+        return ResponseOK(message="File upload successfully", code=201)
