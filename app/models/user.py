@@ -1,5 +1,5 @@
 import bcrypt
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String
 
 from app.config.database import Base
 
