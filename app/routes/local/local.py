@@ -25,7 +25,7 @@ oauth_schema = OAuth2PasswordBearer(tokenUrl="/login")
 
 
 @router_local.post(
-    "/login", response_model=Token, responses={401: {"model": HTTPError}},
+    "/login-admin", response_model=Token, responses={401: {"model": HTTPError}},
     tags=["Login & Logout"]
 )
 async def login_for_access_token(
@@ -35,7 +35,7 @@ async def login_for_access_token(
 
 
 @router_local.post(
-    "/login-person", response_model=PersonLogged, responses={401: {"model": HTTPError}},
+    "/login", response_model=PersonLogged, responses={401: {"model": HTTPError}},
     tags=["Login & Logout"]
 )
 async def login_person(
