@@ -12,7 +12,10 @@ from app.main import get_db
 from app.routes import auth
 from app.routes.common import router_local
 from app.schemas.message import ReadMessage
-from app.schemas.person import Person as schema_person
+from app.schemas.person import (
+    Person as schema_person,
+    CreatePerson as schema_create_person
+)
 from app.schemas.person_user import PersonUser as schema_person_user
 from app.schemas.responses import ResponseOK, ResponseNOK
 from app.schemas.token import Token
@@ -92,7 +95,7 @@ async def set_messages_read(request: Request, message_id: int):
 @router_local.post(
     "/createperson", response_model=ResponseOK, responses={417: {"model": ResponseNOK}}
 )
-async def create_person(person: schema_person):
+async def create_person(person: schema_create_person):
     return LocalImpl().create_person(person)
 
 

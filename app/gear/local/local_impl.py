@@ -21,7 +21,10 @@ from app.models.permission import Permission
 from app.models.person import Person as model_person
 from app.models.user import User as model_user
 from app.models.user_message import UserMessage as model_user_message
-from app.schemas.person import Person as schema_person
+from app.schemas.person import (
+    Person as schema_person,
+    CreatePerson as schema_create_person,
+)
 from app.schemas.person_user import PersonUser as schema_person_user
 from app.schemas.responses import ResponseNOK, ResponseOK
 from app.schemas.user import User as schema_user
@@ -269,7 +272,7 @@ class LocalImpl:
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message=f"Error: {str(e)}", code=417)
 
-    def create_person(self, person: schema_person):
+    def create_person(self, person: schema_create_person):
         try:
             new_person = model_person(**person.dict())
 
