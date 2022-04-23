@@ -33,6 +33,7 @@ class Person(BaseModel):
     email: Optional[str]
     identification_front_image: Optional[str]
     identification_back_image: Optional[str]
+    id_person_status: Optional[int]
 
 
     @validator("birthdate", pre=True)
@@ -65,6 +66,7 @@ class Person2(BaseModel):
     department: Optional[str]
     locality: Optional[str]
     email: Optional[str]
+    id_person_status: Optional[int]
 
 
 class PersonFamily(BaseModel):
@@ -92,6 +94,7 @@ class PersonFamily(BaseModel):
     department: Optional[str]
     locality: Optional[str]
     email: Optional[str]
+    id_person_status: Optional[int]
     family_group: List[Person2]
 
 

@@ -36,6 +36,7 @@ class Person(Base):
     email = Column(String(200), nullable=False)
     identification_front_image = Column(Text, nullable=False)
     identification_back_image = Column(Text, nullable=False)
+    id_person_status = Column(Integer, nullable=False)
 
     def __init__(
         self, id: int, surname: str, name: str, identification_number: str, birthdate: datetime, id_gender: int,
@@ -43,7 +44,7 @@ class Person(Base):
             is_diabetic: bool, is_hypertensive: bool, is_chronic_respiratory_disease: bool,
             is_chronic_kidney_disease: bool, identification_number_master: str, id_identification_type: int,
             id_identification_type_master: int, is_deleted: bool, id_patient: int, id_admin_status: int,
-            phone_number: str, department:str, locality: str, email: str):
+            phone_number: str, department:str, locality: str, email: str, id_person_status: int):
         self.id = id
         self.surname = surname
         self.name = name
@@ -69,3 +70,4 @@ class Person(Base):
         self.department = department
         self.locality = locality
         self.email = email
+        self.id_person_status = id_person_status
