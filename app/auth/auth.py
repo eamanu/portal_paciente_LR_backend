@@ -38,7 +38,14 @@ def authenticate_user(db: Session, username: str, password: str) -> bool:
     user = get_user(username)
     if user is None:
         return False
-    return user.check_password(password)
+    return user.check_password(password) and not user.admin
+
+
+def authenticate_user_and_is_admin(db: Session, username: str, password: str) -> bool:
+    user = get_user(username)
+    if user is None:
+        return False
+    return user.check_password(password) and user.admin
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
