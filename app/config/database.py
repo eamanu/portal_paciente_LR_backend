@@ -30,7 +30,7 @@ from app.models import (  # noqa
     user,
     user_category,
     user_front_end,
-    user_message,
+    person_message,
     user_role,
 )
 

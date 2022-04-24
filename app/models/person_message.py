@@ -10,5 +10,3 @@ class PersonMessage(Base):
     id_person = Column(Integer, nullable=False)
     id_message = Column(Integer, nullable=False)
     read_datetime = Column(DateTime, nullable=False)
-
-

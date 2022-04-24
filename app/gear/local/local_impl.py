@@ -9,7 +9,12 @@ from sqlalchemy.orm import Session
 import aiofiles
 import base64
 
-from app.config.config import WHITE_LIST_PATH, AUTHORIZATION_ENABLED, DEBUG_ENABLED, LOCAL_FILE_UPLOAD_DIRECTORY
+from app.config.config import (
+    WHITE_LIST_PATH,
+    AUTHORIZATION_ENABLED,
+    DEBUG_ENABLED,
+    LOCAL_FILE_UPLOAD_DIRECTORY,
+)
 from app.config.database import SessionLocal
 from app.gear.local.bearer_token import BearerToken
 from app.gear.log.main_logger import MainLogger, logging
@@ -20,7 +25,6 @@ from app.models.message import Message as model_message
 from app.models.permission import Permission
 from app.models.person import Person as model_person
 from app.models.user import User as model_user
-from app.models.user_message import UserMessage as model_user_message
 from app.models.person_message import PersonMessage as model_person_message
 from app.schemas.person import Person as schema_person
 from app.schemas.person_user import PersonUser as schema_person_user
@@ -239,20 +243,15 @@ class LocalImpl:
 
     def update_message(self, message: Message):
         try:
+            existing_message = (
+                self.db.query(model_message)
+                .where(model_message.id == message.id)
+                .first()
+            )
 
-            updated_message = Message()
-
-            updated_message.id = message.id
-            updated_message.header = message.header
-            updated_message.body = message.body
-            updated_message.is_formatted = message.is_formatted
-
-            existing_message = self.db.query(model_message).where(
-                    model_message.id == message.id).first()
-
-            existing_message.header = updated_message.header
-            existing_message.body = updated_message.body
-            existing_message.is_formatted = updated_message.is_formatted
+            existing_message.header = message.header
+            existing_message.body = message.body
+            existing_message.is_formatted = message.is_formatted
 
             self.db.commit()
 
@@ -264,69 +263,59 @@ class LocalImpl:
 
     def delete_message(self, message_id: int):
         try:
-            message = self.db.query(model_message).where(
-                model_message.id == message_id).first()
+            message = (
+                self.db.query(model_message)
+                .where(model_message.id == message_id)
+                .first()
+            )
+            if message is None:
+                return ResponseOK(message="Message doesn't exist", code=200)
 
             self.db.delete(message)
-
             self.db.commit()
 
         except Exception as e:
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message=f"Error: {str(e)}", code=417)
+        return ResponseOK(message="Message deleted successfully", code=200)
 
-        return message
-
-    def send_message(self, messsage_id: int, category_id: int, is_for_all_categories: bool):
-
+    def send_message(
+        self, messsage_id: int, category_id: int, is_for_all_categories: bool
+    ):
         try:
-
             create_relation = False
-
-            existing_persons = self.db.query(model_person).all();
-
+            existing_persons = self.db.query(model_person).all()
             for p in existing_persons:
-
                 if is_for_all_categories:
-
                     create_relation = True
-
                 else:
-
                     if category_id == Category.diabetic and p.is_diabetic:
                         create_relation = True
-
                     else:
-
                         if category_id == Category.hypertensive and p.is_hypertensive:
                             create_relation = True
-
                         else:
-
-                            if category_id == Category.chronic_respiratory_disease and p.is_chronic_respiratory_disease:
+                            if (
+                                category_id == Category.chronic_respiratory_disease
+                                and p.is_chronic_respiratory_disease
+                            ):
                                 create_relation = True
-
                             else:
-
-                                if category_id == Category.chronic_kidney_disease and p.is_chronic_kidney_disease:
+                                if (
+                                    category_id == Category.chronic_kidney_disease
+                                    and p.is_chronic_kidney_disease
+                                ):
                                     create_relation = True
-
                 if create_relation:
-
                     new_person_message = model_person_message()
                     new_person_message.id_person = p.id
                     new_person_message.id_message = messsage_id
-
                     self.db.add(new_person_message)
-
                     self.db.commit()
-
                 create_relation = False
-
         except Exception as e:
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message="Error, Message relation not created", code=417)
-
         return ResponseOK(message="Message relation created successfully", code=201)
 
     def get_messages(self, person_id: int, only_unread: bool):
@@ -336,19 +325,20 @@ class LocalImpl:
                 .join(
                     model_person_message,
                     model_person_message.id_message == model_message.id,
-                )
-                .join(model_person, model_person.id == model_person_message.id_person)
-                .where(
-                    model_person_message.read_datetime is None if only_unread else True
-                )
-                .where(model_person.id == person_id)
-                .all()
+                ).join(
+                    model_person,
+                    model_person.id == model_person_message.id_person
+                ).where(model_person.id == person_id)
             )
 
             result = []
             for message, read_time in messages:
+                if only_unread and read_time is not None:
+                    continue
                 message_schema = Message.from_orm(message)
-                read_message = ReadMessage(message=message_schema, read_datetime=read_time)
+                read_message = ReadMessage(
+                    message=message_schema, read_datetime=read_time
+                )
                 result.append(read_message)
         except Exception as e:
             self.log.log_error_message(e, self.module)
@@ -356,10 +346,22 @@ class LocalImpl:
 
         return result
 
+    def get_all_messages(self):
+        try:
+            messages = self.db.query(model_message).all()
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
+            return ResponseNOK(message=f"Error: {str(e)}", code=417)
+
+        return messages
+
     def get_message(self, message_id: int):
         try:
-            message = self.db.query(model_message).where(
-                    model_message.id == message_id).first()
+            message = (
+                self.db.query(model_message)
+                .where(model_message.id == message_id)
+                .first()
+            )
 
         except Exception as e:
             self.log.log_error_message(e, self.module)
@@ -367,21 +369,15 @@ class LocalImpl:
 
         return message
 
-    def get_messages(self):
-        try:
-            messages = self.db.query(model_message).all()
-
-        except Exception as e:
-            self.log.log_error_message(e, self.module)
-            return ResponseNOK(message=f"Error: {str(e)}", code=417)
-
-        return messages
-
     def set_message_read(self, person_id: int, message_id: int):
         try:
 
-            person_message = (self.db.query(model_person_message).where(model_person_message.id_person == person_id)
-                               .where(model_person_message.id_message == message_id).first())
+            person_message = (
+                self.db.query(model_person_message)
+                .where(model_person_message.id_person == person_id)
+                .where(model_person_message.id_message == message_id)
+                .first()
+            )
 
             person_message.read_datetime = datetime.now()
 
@@ -508,8 +504,7 @@ class LocalImpl:
             family_group = (
                 self.db.query(model_person)
                 .where(
-                    model_person.identification_number_master
-                    == identification_number
+                    model_person.identification_number_master == identification_number
                 )
                 .all()
             )
@@ -519,7 +514,9 @@ class LocalImpl:
 
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            return ResponseNOK(message=f"Person cannot be retrieve. Error: {str(e)}", code=417)
+            return ResponseNOK(
+                message=f"Person cannot be retrieve. Error: {str(e)}", code=417
+            )
         return existing_person
 
     def set_admin_status_to_person(self, person_id: int, admin_status_id: int):
@@ -531,7 +528,9 @@ class LocalImpl:
             self.db.commit()
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            return ResponseNOK(message=f"Person cannot be updated. Error: {str(e)}", code=417)
+            return ResponseNOK(
+                message=f"Person cannot be updated. Error: {str(e)}", code=417
+            )
         return schema_person.from_orm(existing_person)
 
     def create_person_and_user(self, person_user: schema_person_user):
@@ -587,39 +586,36 @@ class LocalImpl:
             return ResponseNOK(message="Person cannot be created", code=417)
         return ResponseOK(message="Person Create successfully", code=201)
 
-
-    async def upload_identification_images(self, person_id: str, file1: UploadFile = File(...),
-                                           file2: UploadFile = File(...)):
+    async def upload_identification_images(
+        self,
+        person_id: str,
+        file1: UploadFile = File(...),
+        file2: UploadFile = File(...),
+    ):
         try:
             # File 1 ------------------------------------------------------------------------------------
-            destination_file_path = LOCAL_FILE_UPLOAD_DIRECTORY + file1.filename  # location to store file
-
+            destination_file_path = (
+                LOCAL_FILE_UPLOAD_DIRECTORY + file1.filename
+            )  # location to store file
             file_a = open(destination_file_path, "wb+")
-
             file_a.write(await file1.read())
-
             file_a.close()
-
             with open(destination_file_path, "rb") as bin_file:
                 b64_string_file1 = base64.b64encode(bin_file.read())
 
             # File 2 ------------------------------------------------------------------------------------
-            destination_file_path = LOCAL_FILE_UPLOAD_DIRECTORY + file2.filename  # location to store file
-
+            destination_file_path = (
+                LOCAL_FILE_UPLOAD_DIRECTORY + file2.filename
+            )  # location to store file
             file_b = open(destination_file_path, "wb+")
-
             file_b.write(await file2.read())
-
             file_b.close()
-
             with open(destination_file_path, "rb") as bin_file:
                 b64_string_file2 = base64.b64encode(bin_file.read())
 
             # Saving process -----------------------------------------------------------------------------
             existing_person = (
-                self.db.query(model_person)
-                    .where(model_person.id == person_id)
-                    .first()
+                self.db.query(model_person).where(model_person.id == person_id).first()
             )
 
             existing_person.identification_front_image = b64_string_file1

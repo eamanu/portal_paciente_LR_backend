@@ -126,7 +126,7 @@ CREATE TABLE `message` (
   `register_datetime` datetime DEFAULT NULL,
   `header` varchar(500) COLLATE latin1_spanish_ci DEFAULT NULL,
   `body` varchar(4000) COLLATE latin1_spanish_ci DEFAULT NULL,
-  `is_formatted` tinyint DEFAULT NULL,
+  `is_formatted` tinyint DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -394,7 +394,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `person_message`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
-CREATE TABLE `user_message` (
+CREATE TABLE `person_message` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `id_person` bigint(20) DEFAULT NULL,
   `id_message` bigint(20) DEFAULT NULL,

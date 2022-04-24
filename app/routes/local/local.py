@@ -107,17 +107,17 @@ async def send_message(message_id: int, category_id: int, is_for_all_categories:
 
 
 @router_local.get(
-    "/getmessages",
+    "/get-messages-by-person",
     response_model=List[ReadMessage],
     responses={417: {"model": ResponseNOK}}, tags=["Message"]
 )
-async def get_messages(person_id: int, only_unread: bool):
+async def get_messages_by_person(person_id: int, only_unread: bool):
     return LocalImpl().get_messages(person_id, only_unread)
 
 
 @router_local.get(
     "/getmessage",
-    response_model=ReadMessage,
+    response_model=Message,
     responses={417: {"model": ResponseNOK}}, tags=["Message"]
 )
 async def get_message(message_id: int):
@@ -125,12 +125,12 @@ async def get_message(message_id: int):
 
 
 @router_local.get(
-    "/getmessages",
-    response_model=List[ReadMessage],
+    "/get-all-messages",
+    response_model=List[Message],
     responses={417: {"model": ResponseNOK}}, tags=["Message"]
 )
-async def get_messages():
-    return LocalImpl().get_messages()
+async def get_all_messages():
+    return LocalImpl().get_all_messages()
 
 
 @router_local.post(
