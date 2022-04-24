@@ -273,6 +273,12 @@ class LocalImpl:
             return ResponseNOK(message=f"Error: {str(e)}", code=417)
 
     def create_person(self, person: schema_create_person):
+        buff_person = (
+            self.db.query(model_person).where(
+                model_person.identification_number==person.identification_number).first()
+        )
+        if buff_person is not None:
+            return ResponseNOK(message="Person already exist", code=417)
         try:
             new_person = model_person(**person.dict())
 
@@ -414,6 +420,18 @@ class LocalImpl:
         return schema_person.from_orm(existing_person)
 
     def create_person_and_user(self, person_user: schema_person_user):
+        person = (
+            self.db.query(model_person).where(
+                model_person.identification_number==person_user.identification_number or
+                model_person.email==person_user.email
+            ).first()
+        )
+        if person is not None:
+            return ResponseNOK(message="Person already exist", code=417)
+
+        user =  self.db.query(model_user).where(model_user.username==person_user.username).first()
+        if user is not None:
+            return ResponseNOK(message="Username already exist", code=417)
         try:
             new_person = model_person(
                 None,
