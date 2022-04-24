@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List
 
-from fastapi import Depends, HTTPException, Request, status, File, UploadFile
+from fastapi import Depends, HTTPException, status, File, UploadFile
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
@@ -11,21 +11,25 @@ from app.gear.local.local_impl import LocalImpl
 from app.main import get_db
 from app.routes import auth
 from app.routes.common import router_local
-from app.schemas.message import Message, ReadMessage
-from app.schemas.person import Person as schema_person
+from app.schemas.message import Message
+from app.schemas.message import ReadMessage
+from app.schemas.person import (
+    Person as schema_person,
+    CreatePerson as schema_create_person
+)
+from app.schemas.person import PersonLogged
 from app.schemas.person_user import PersonUser as schema_person_user
+from app.schemas.responses import HTTPError
 from app.schemas.responses import ResponseOK, ResponseNOK
 from app.schemas.token import Token
 from app.schemas.user import User as schema_user
-from app.schemas.person import PersonLogged
-from app.schemas.responses import HTTPError
 
 
 oauth_schema = OAuth2PasswordBearer(tokenUrl="/login")
 
 
 @router_local.post(
-    "/login", response_model=Token, responses={401: {"model": HTTPError}},
+    "/login-admin", response_model=Token, responses={401: {"model": HTTPError}},
     tags=["Login & Logout"]
 )
 async def login_for_access_token(
@@ -35,7 +39,7 @@ async def login_for_access_token(
 
 
 @router_local.post(
-    "/login-person", response_model=PersonLogged, responses={401: {"model": HTTPError}},
+    "/login", response_model=PersonLogged, responses={401: {"model": HTTPError}},
     tags=["Login & Logout"]
 )
 async def login_person(
@@ -145,7 +149,7 @@ async def set_message_read(person_id: int, message_id: int):
 @router_local.post(
     "/createperson", response_model=ResponseOK, responses={417: {"model": ResponseNOK}}, tags=["User and person"]
 )
-async def create_person(person: schema_person):
+async def create_person(person: schema_create_person):
     return LocalImpl().create_person(person)
 
 

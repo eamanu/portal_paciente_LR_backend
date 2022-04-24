@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from app.auth.auth import authenticate_user
+from app.auth.auth import authenticate_user, authenticate_user_and_is_admin
 from app.config.config import ACCESS_TOKEN_EXPIRE_MINUTES
 from app.main import get_db
 from datetime import timedelta
@@ -16,7 +16,7 @@ def login_for_access_token(
     db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()
 ):
     username = form_data.username
-    user = authenticate_user(db, username, form_data.password)
+    user = authenticate_user_and_is_admin(db, username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

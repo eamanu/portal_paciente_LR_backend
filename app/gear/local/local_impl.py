@@ -1,3 +1,4 @@
+import base64
 from datetime import datetime, timedelta
 from typing import Optional, Union
 
@@ -6,8 +7,6 @@ from fastapi.responses import Response
 from jose.exceptions import JWTError
 from sqlalchemy.exc import PendingRollbackError
 from sqlalchemy.orm import Session
-import aiofiles
-import base64
 
 from app.config.config import (
     WHITE_LIST_PATH,
@@ -24,14 +23,17 @@ from app.models.expiration_black_list import (
 from app.models.message import Message as model_message
 from app.models.permission import Permission
 from app.models.person import Person as model_person
-from app.models.user import User as model_user
 from app.models.person_message import PersonMessage as model_person_message
-from app.schemas.person import Person as schema_person
+from app.models.user import User as model_user
+from app.schemas.category import Category
+from app.schemas.message import Message, ReadMessage
+from app.schemas.person import (
+    Person as schema_person,
+    CreatePerson as schema_create_person,
+)
 from app.schemas.person_user import PersonUser as schema_person_user
 from app.schemas.responses import ResponseNOK, ResponseOK
 from app.schemas.user import User as schema_user
-from app.schemas.message import Message, ReadMessage
-from app.schemas.category import Category
 
 
 class LocalImpl:
@@ -388,7 +390,13 @@ class LocalImpl:
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message=f"Error: {str(e)}", code=417)
 
-    def create_person(self, person: schema_person):
+    def create_person(self, person: schema_create_person):
+        buff_person = (
+            self.db.query(model_person).where(
+                model_person.identification_number==person.identification_number).first()
+        )
+        if buff_person is not None:
+            return ResponseNOK(message="Person already exist", code=417)
         try:
             new_person = model_person(**person.dict())
 
@@ -534,6 +542,18 @@ class LocalImpl:
         return schema_person.from_orm(existing_person)
 
     def create_person_and_user(self, person_user: schema_person_user):
+        person = (
+            self.db.query(model_person).where(
+                model_person.identification_number==person_user.identification_number or
+                model_person.email==person_user.email
+            ).first()
+        )
+        if person is not None:
+            return ResponseNOK(message="Person already exist", code=417)
+
+        user =  self.db.query(model_user).where(model_user.username==person_user.username).first()
+        if user is not None:
+            return ResponseNOK(message="Username already exist", code=417)
         try:
             new_person = model_person(
                 None,

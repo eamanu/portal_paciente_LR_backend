@@ -13,6 +13,7 @@ class User(Base):
     password = Column(String(500), nullable=False)
     id_person = Column(Integer, nullable=True)
     id_user_status = Column(Integer, nullable=True)
+    is_admin = Column(Integer, nullable=False, default=0)
 
     @staticmethod
     def encrypt_pwd(password):
@@ -22,10 +23,16 @@ class User(Base):
     def check_password(self, password):
         return bcrypt.checkpw(password.encode("utf8"), self.password.encode("utf8"))
 
+    @property
+    def admin(self) -> bool:
+        return bool(self.is_admin)
+
     def __init__(
-        self, username: str, password: str, id_person: int, id_user_status: int
+        self, username: str, password: str, id_person: int, id_user_status: int,
+        is_admin: bool = False
     ):
         self.username = username
         self.password = self.encrypt_pwd(password)
         self.id_person = id_person
         self.id_user_status = id_user_status
+        self.is_admin = is_admin
