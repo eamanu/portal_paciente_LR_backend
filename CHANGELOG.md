@@ -8,7 +8,15 @@
 * [Development] Create codeql-analysis.yml
 * Fix de creación de personas y users.
 * Se agrega que no se pueden crear personas con el mismo dni y mails, y usuarios con el mismo username.
-
+* Se agrega/arregla los siguientes endpoints:
+  - /createmessage
+  - /updatemessage
+  - /deletemessage
+  - /sendmessage
+  - /get-messages-by-person
+  - /getmessage
+  - /get-all-messages
+  - /setmessageread
 
 ## 1.0.0
 * Hasta dónde lo conocemos :-)

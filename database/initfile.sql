@@ -20,7 +20,7 @@ CREATE TABLE `category` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) CHARACTER SET latin1 COLLATE latin1_spanish_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -29,9 +29,33 @@ CREATE TABLE `category` (
 
 LOCK TABLES `category` WRITE;
 /*!40000 ALTER TABLE `category` DISABLE KEYS */;
-INSERT INTO `category` (`id`, `name`) VALUES (1,'C1');
-INSERT INTO `category` (`id`, `name`) VALUES (2,'C2');
+INSERT INTO `category` (`id`, `name`) VALUES (1,'DIABÉTICO');
+INSERT INTO `category` (`id`, `name`) VALUES (2,'HIPERTENSO');
+INSERT INTO `category` (`id`, `name`) VALUES (3,'ENFERMEDAD RESPIRATORIA CRÓNICA');
+INSERT INTO `category` (`id`, `name`) VALUES (4,'ENFERMEDAD RENAL CRÓNICA');
 /*!40000 ALTER TABLE `category` ENABLE KEYS */;
+UNLOCK TABLES;
+
+DROP TABLE IF EXISTS `person_status`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `person_status` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) CHARACTER SET latin1 COLLATE latin1_spanish_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `person_status`
+--
+
+LOCK TABLES `person_status` WRITE;
+/*!40000 ALTER TABLE `person_status` DISABLE KEYS */;
+INSERT INTO `person_status` (`id`, `name`) VALUES (1,'PENDIENTE DE VALIDACIÓN');
+INSERT INTO `person_status` (`id`, `name`) VALUES (2,'VALIDADO');
+INSERT INTO `person_status` (`id`, `name`) VALUES (3,'RECHAZADO');
+/*!40000 ALTER TABLE `person_status` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -102,6 +126,7 @@ CREATE TABLE `message` (
   `register_datetime` datetime DEFAULT NULL,
   `header` varchar(500) COLLATE latin1_spanish_ci DEFAULT NULL,
   `body` varchar(4000) COLLATE latin1_spanish_ci DEFAULT NULL,
+  `is_formatted` tinyint DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -206,6 +231,7 @@ CREATE TABLE `person` (
   `email` varchar(200) COLLATE latin1_spanish_ci DEFAULT NULL,
   `identification_front_image` longtext COLLATE latin1_spanish_ci,
   `identification_back_image` longtext COLLATE latin1_spanish_ci,
+  `id_person_status` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -363,15 +389,15 @@ INSERT INTO `user_category` (`id`, `id_user`, `id_category`) VALUES (4,4,2);
 UNLOCK TABLES;
 
 --
--- Table structure for table `user_message`
+-- Table structure for table `person_message`
 --
 
-DROP TABLE IF EXISTS `user_message`;
+DROP TABLE IF EXISTS `person_message`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
-CREATE TABLE `user_message` (
+CREATE TABLE `person_message` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `id_user` bigint(20) DEFAULT NULL,
+  `id_person` bigint(20) DEFAULT NULL,
   `id_message` bigint(20) DEFAULT NULL,
   `read_datetime` varchar(45) COLLATE latin1_spanish_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -379,17 +405,17 @@ CREATE TABLE `user_message` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `user_message`
+-- Dumping data for table `person_message`
 --
 
-LOCK TABLES `user_message` WRITE;
-/*!40000 ALTER TABLE `user_message` DISABLE KEYS */;
-INSERT INTO `user_message` (`id`, `id_user`, `id_message`, `read_datetime`) VALUES (1,1,1,'2022-02-08 15:15:59.556278');
-INSERT INTO `user_message` (`id`, `id_user`, `id_message`, `read_datetime`) VALUES (2,2,1,NULL);
-INSERT INTO `user_message` (`id`, `id_user`, `id_message`, `read_datetime`) VALUES (3,3,2,NULL);
-INSERT INTO `user_message` (`id`, `id_user`, `id_message`, `read_datetime`) VALUES (4,4,2,NULL);
-INSERT INTO `user_message` (`id`, `id_user`, `id_message`, `read_datetime`) VALUES (5,1,2,NULL);
-/*!40000 ALTER TABLE `user_message` ENABLE KEYS */;
+LOCK TABLES `person_message` WRITE;
+/*!40000 ALTER TABLE `person_message` DISABLE KEYS */;
+INSERT INTO `person_message` (`id`, `id_person`, `id_message`, `read_datetime`) VALUES (1,1,1,'2022-02-08 15:15:59.556278');
+INSERT INTO `person_message` (`id`, `id_person`, `id_message`, `read_datetime`) VALUES (2,2,1,NULL);
+INSERT INTO `person_message` (`id`, `id_person`, `id_message`, `read_datetime`) VALUES (3,3,2,NULL);
+INSERT INTO `person_message` (`id`, `id_person`, `id_message`, `read_datetime`) VALUES (4,4,2,NULL);
+INSERT INTO `person_message` (`id`, `id_person`, `id_message`, `read_datetime`) VALUES (5,1,2,NULL);
+/*!40000 ALTER TABLE `person_message` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
