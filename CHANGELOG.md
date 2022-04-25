@@ -17,6 +17,7 @@
   - /getmessage
   - /get-all-messages
   - /setmessageread
+* [Development] Se agrega control de version
 
 ## 1.0.0
 * Hasta dónde lo conocemos :-)

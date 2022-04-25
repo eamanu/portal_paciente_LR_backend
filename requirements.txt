@@ -61,3 +61,4 @@ watchgod==0.7
 websockets==10.1
 aiofiles==0.8.0
 pydantic_sqlalchemy==0.0.9
+bump2version==1.0.1
