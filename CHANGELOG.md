@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.1.1
+* Se agrega endpoint "/version" para verificar la versión del backend.
+
 ## 1.1.0
 * Se cambia los endpoints para el login:
   - "/login": es utilizado para loguear pacientes.

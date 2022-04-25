@@ -23,9 +23,17 @@ from app.schemas.responses import HTTPError
 from app.schemas.responses import ResponseOK, ResponseNOK
 from app.schemas.token import Token
 from app.schemas.user import User as schema_user
+from pathlib import Path
 
 
 oauth_schema = OAuth2PasswordBearer(tokenUrl="/login")
+
+
+@router_local.get("/version")
+async def version():
+    with open(Path("./app/VERSION"), "r") as f:
+        version = f.read().strip()
+    return {"version": version}
 
 
 @router_local.post(
