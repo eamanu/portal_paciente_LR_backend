@@ -557,16 +557,13 @@ class LocalImpl:
             self.db.commit()
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            return ResponseNOK(
-                message=f"Person cannot be updated. Error: {str(e)}", code=417
-            )
-        return schema_person.from_orm(existing_person)
+        return ResponseOK(message="Person admin status set successfully", code=201)
 
     def create_person_and_user(self, person_user: schema_person_user):
         person = (
             self.db.query(model_person).where(
-                model_person.identification_number==person_user.identification_number or
-                model_person.email==person_user.email
+                model_person.identification_number == person_user.identification_number or
+                model_person.email == person_user.email
             ).first()
         )
         if person is not None:
