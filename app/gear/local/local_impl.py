@@ -276,44 +276,65 @@ class LocalImpl:
             self.db.delete(message)
             self.db.commit()
 
+            messages = (
+                self.db.query(model_person_message)
+                    .where(model_person_message.id_message == message_id)
+                    .all()
+            )
+            if messages is None:
+                return ResponseOK(message="Message doesn't exist", code=200)
+
+            for m in messages:
+                self.db.delete(m)
+
+            self.db.commit()
+
         except Exception as e:
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message=f"Error: {str(e)}", code=417)
         return ResponseOK(message="Message deleted successfully", code=200)
 
     def send_message(
-        self, messsage_id: int, category_id: int, is_for_all_categories: bool
+        self, message_id: int, category_id: int, is_for_all_categories: bool
     ):
         try:
             create_relation = False
             existing_persons = self.db.query(model_person).all()
             for p in existing_persons:
+
                 if is_for_all_categories:
                     create_relation = True
                 else:
-                    if category_id == Category.diabetic and p.is_diabetic:
+                    if p.is_diabetic and category_id == Category.diabetic.value:
                         create_relation = True
                     else:
-                        if category_id == Category.hypertensive and p.is_hypertensive:
+                        if p.is_hypertensive and category_id == Category.hypertensive.value:
                             create_relation = True
                         else:
-                            if (
-                                category_id == Category.chronic_respiratory_disease
-                                and p.is_chronic_respiratory_disease
-                            ):
+                            if (p.is_chronic_respiratory_disease
+                                and category_id == Category.chronic_respiratory_disease.value):
                                 create_relation = True
                             else:
-                                if (
-                                    category_id == Category.chronic_kidney_disease
-                                    and p.is_chronic_kidney_disease
-                                ):
+                                if (p.is_chronic_kidney_disease
+                                    and category_id == Category.chronic_kidney_disease.value):
                                     create_relation = True
                 if create_relation:
-                    new_person_message = model_person_message()
-                    new_person_message.id_person = p.id
-                    new_person_message.id_message = messsage_id
-                    self.db.add(new_person_message)
-                    self.db.commit()
+
+                    #Verifico si ya no se le asignó el mensaje a esta persona...
+                    messages = (
+                        self.db.query(model_person_message)
+                            .where(model_person_message.id_message == message_id)
+                            .where(model_person_message.id_person == p.id)
+                            .all()
+                    )
+
+                    if len(messages) == 0:
+                        new_person_message = model_person_message()
+                        new_person_message.id_person = p.id
+                        new_person_message.id_message = message_id
+                        self.db.add(new_person_message)
+                        self.db.commit()
+
                 create_relation = False
         except Exception as e:
             self.log.log_error_message(e, self.module)
