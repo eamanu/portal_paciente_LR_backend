@@ -68,6 +68,7 @@ class CreatePerson(BaseModel):
     department: Optional[str]
     locality: Optional[str]
     email: Optional[str]
+    id_person_status: Optional[int]
 
 
     @validator("birthdate", pre=True)
