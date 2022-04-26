@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.1.2
+* Fix del request a HCE Get patient Data
+
 ## 1.1.1
 * Se agrega endpoint "/version" para verificar la versión del backend.
 
