@@ -402,10 +402,12 @@ class LocalImpl:
 
             self.db.add(new_person)
             self.db.commit()
+
+            return new_person
+
         except Exception as e:
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message="Error, person not created", code=417)
-        return ResponseOK(message="Person Create successfully", code=201)
 
     def update_person(self, person: schema_person) -> Union[schema_person, ResponseNOK]:
 
@@ -602,9 +604,11 @@ class LocalImpl:
 
             self.db.add(new_user)
             self.db.commit()
+
+            return value
+
         except Exception as e:
             return ResponseNOK(message="Person cannot be created", code=417)
-        return ResponseOK(message="Person Create successfully", code=201)
 
     async def upload_identification_images(
         self,
@@ -637,6 +641,9 @@ class LocalImpl:
             existing_person = (
                 self.db.query(model_person).where(model_person.id == person_id).first()
             )
+
+            if existing_person is None:
+                return ResponseNOK(message=f"Nonexistent person_id: {str(person_id)}", code=417)
 
             existing_person.identification_front_image = b64_string_file1
             existing_person.identification_back_image = b64_string_file2
