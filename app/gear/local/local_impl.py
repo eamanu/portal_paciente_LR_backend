@@ -505,8 +505,7 @@ class LocalImpl:
                 existing_person = (
                     self.db.query(model_person)
                     .where(
-                        model_person.identification_number
-                        == person_identification_number
+                        model_person.identification_number == person_identification_number
                     )
                     .first()
                 )
@@ -519,9 +518,10 @@ class LocalImpl:
                 )
                 .all()
             )
+            filter_family = [person for person in family_group if person.identification_number != identification_number]
 
             if family_group != "[]":
-                existing_person.family_group = family_group
+                existing_person.family_group = filter_family
 
         except Exception as e:
             self.log.log_error_message(e, self.module)
