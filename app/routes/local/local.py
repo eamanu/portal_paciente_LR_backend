@@ -15,7 +15,8 @@ from app.schemas.message import Message
 from app.schemas.message import ReadMessage
 from app.schemas.person import (
     Person as schema_person,
-    CreatePerson as schema_create_person
+    CreatePerson as schema_create_person,
+    CreatePersonResponse as schema_create_person_response
 )
 from app.schemas.person import PersonLogged
 from app.schemas.person_user import PersonUser as schema_person_user
@@ -154,11 +155,10 @@ async def set_message_read(person_id: int, message_id: int):
     return LocalImpl().set_message_read(person_id, message_id)
 
 
-# TODO: cambiar
 @router_local.post(
     "/createperson",
-    # response_model=ResponseOK,
-    # responses={417: {"model": ResponseNOK}}, tags=["User and person"]
+    response_model=schema_create_person_response,
+    responses={417: {"model": ResponseNOK}}, tags=["User and person"]
 )
 async def create_person(person: schema_create_person):
     return LocalImpl().create_person(person)
@@ -199,11 +199,10 @@ async def set_admin_status_to_person(person_id: int, admin_status_id: int):
     return LocalImpl().set_admin_status_to_person(person_id, admin_status_id)
 
 
-# TODO: 
 @router_local.post(
     "/createpersonanduser",
-    # response_model=ResponseOK,
-    # responses={417: {"model": ResponseNOK}}, tags=["User and person"]
+    response_model=schema_create_person_response,
+    responses={417: {"model": ResponseNOK}}, tags=["User and person"]
 )
 async def create_person_and_user(person_user: schema_person_user):
     return LocalImpl().create_person_and_user(person_user)

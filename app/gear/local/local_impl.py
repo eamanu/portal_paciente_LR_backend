@@ -30,6 +30,7 @@ from app.schemas.message import Message, ReadMessage
 from app.schemas.person import (
     Person as schema_person,
     CreatePerson as schema_create_person,
+    CreatePersonResponse as schema_create_person_response
 )
 from app.schemas.person_user import PersonUser as schema_person_user
 from app.schemas.responses import ResponseNOK, ResponseOK
@@ -403,7 +404,7 @@ class LocalImpl:
             self.db.add(new_person)
             self.db.commit()
 
-            return new_person
+            return schema_create_person_response.from_orm(new_person)
 
         except Exception as e:
             self.log.log_error_message(e, self.module)
@@ -553,7 +554,7 @@ class LocalImpl:
         if person is not None:
             return ResponseNOK(message="Person already exist", code=417)
 
-        user =  self.db.query(model_user).where(model_user.username==person_user.username).first()
+        user = self.db.query(model_user).where(model_user.username==person_user.username).first()
         if user is not None:
             return ResponseNOK(message="Username already exist", code=417)
         try:
@@ -605,10 +606,10 @@ class LocalImpl:
             self.db.add(new_user)
             self.db.commit()
 
-            return value
+            return schema_create_person_response.from_orm(value)
 
         except Exception as e:
-            return ResponseNOK(message="Person cannot be created", code=417)
+            return ResponseNOK(message=f"Person cannot be created. Error: {str(e)}", code=417)
 
     async def upload_identification_images(
         self,
