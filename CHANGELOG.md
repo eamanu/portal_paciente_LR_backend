@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 1.2.0
+* Cuando se crea la persona: retorna el id.
+* Se agrega el id de persona en el login.
+* Categorias: nuevo endpoint.
+* Estados de personas: nuevo endpoint.
+* Cuando se crea el mensaje: retorna el id.
+* Agregar a mensajes un atributo que diga cuándo un mensaje se envió.
+
 ## 1.1.2
 * Fix del request a HCE Get patient Data
 
