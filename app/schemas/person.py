@@ -33,6 +33,8 @@ class Person(BaseModel):
     email: Optional[str]
     identification_front_image: Optional[str]
     identification_back_image: Optional[str]
+    identification_front_image_file_type: Optional[str]
+    identification_back_image_file_type: Optional[str]
     id_person_status: Optional[int]
 
     @validator("birthdate", pre=True)

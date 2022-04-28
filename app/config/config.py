@@ -46,5 +46,6 @@ AUTHORIZATION_ENABLED = False
 # region File configurations
 
 LOCAL_FILE_UPLOAD_DIRECTORY = os.getenv("TMP_FILES_UPLOAD")
+LOCAL_FILE_DOWNLOAD_DIRECTORY = os.getenv("TMP_FILES_DOWNLOAD")
 
 # endregion

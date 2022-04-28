@@ -1,11 +1,11 @@
 import base64
-import json
+import uuid
 
 from datetime import datetime, timedelta
 from typing import Optional, Union
 
 from fastapi import Request, status, File, UploadFile
-from fastapi.responses import Response
+from fastapi.responses import Response, FileResponse
 from jose.exceptions import JWTError
 from sqlalchemy.exc import PendingRollbackError
 from sqlalchemy.orm import Session
@@ -15,6 +15,7 @@ from app.config.config import (
     AUTHORIZATION_ENABLED,
     DEBUG_ENABLED,
     LOCAL_FILE_UPLOAD_DIRECTORY,
+    LOCAL_FILE_DOWNLOAD_DIRECTORY
 )
 from app.config.database import SessionLocal
 from app.gear.local.bearer_token import BearerToken
@@ -691,6 +692,10 @@ class LocalImpl:
         file2: UploadFile = File(...),
     ):
         try:
+
+            print(vars(file1))
+            print(vars(file2))
+
             # File 1 ------------------------------------------------------------------------------------
             destination_file_path = (
                 LOCAL_FILE_UPLOAD_DIRECTORY + file1.filename
@@ -721,6 +726,8 @@ class LocalImpl:
 
             existing_person.identification_front_image = b64_string_file1
             existing_person.identification_back_image = b64_string_file2
+            existing_person.identification_front_image_file_type = file1.content_type
+            existing_person.identification_back_image_file_type = file2.content_type
 
             self.db.commit()
 
@@ -728,3 +735,6 @@ class LocalImpl:
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message=f"Error: {str(e)}", code=417)
         return ResponseOK(message="Files uploaded successfully.", code=201)
+
+
+
