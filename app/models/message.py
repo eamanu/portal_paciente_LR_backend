@@ -12,3 +12,4 @@ class Message(Base):
     header = Column(String(500), nullable=False)
     body = Column(String(4000), nullable=False)
     is_formatted = Column(Boolean, nullable=True)
+    sent_datetime = Column(DateTime, nullable=False, default=datetime.now())

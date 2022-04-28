@@ -127,6 +127,7 @@ CREATE TABLE `message` (
   `header` varchar(500) COLLATE latin1_spanish_ci DEFAULT NULL,
   `body` varchar(4000) COLLATE latin1_spanish_ci DEFAULT NULL,
   `is_formatted` tinyint DEFAULT 0,
+  `sent_datetime` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;

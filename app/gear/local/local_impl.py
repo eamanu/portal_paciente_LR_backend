@@ -1,4 +1,6 @@
 import base64
+import json
+
 from datetime import datetime, timedelta
 from typing import Optional, Union
 
@@ -25,7 +27,10 @@ from app.models.permission import Permission
 from app.models.person import Person as model_person
 from app.models.person_message import PersonMessage as model_person_message
 from app.models.user import User as model_user
-from app.schemas.category import Category
+from app.models.person_status import PersonStatus as model_person_status
+from app.models.role import Role as model_role
+from app.models.category import Category as model_category
+from app.schemas.category_enum import CategoryEnum
 from app.schemas.message import Message, ReadMessage
 from app.schemas.person import (
     Person as schema_person,
@@ -111,7 +116,7 @@ class LocalImpl:
             value = self.db.query(model_user).fetchall()
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            return ResponseNOK(message="Error, Users cannot be retrieve", code=417)
+            return ResponseNOK(message="Users cannot be retrieved.", code=417)
         return value
 
     def create_user(self, user: schema_user) -> Union[ResponseOK, ResponseNOK]:
@@ -121,15 +126,15 @@ class LocalImpl:
             self.db.commit()
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            return ResponseNOK(message="Error, User not created", code=417)
-        return ResponseOK(message="User Create successfully", code=201)
+            return ResponseNOK(message="User not created.", code=417)
+        return ResponseOK(message="User created successfully.", code=201)
 
     def get_user_by_id(self, user_id: int):
         try:
             value = self.db.query(model_user).where(model_user.id == user_id).first()
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            return ResponseNOK(message="Error, User cannot be retrieve", code=202)
+            return ResponseNOK(message="User cannot be retrieved.", code=202)
         return value
 
     def get_user_by_username(self, username: str):
@@ -153,8 +158,8 @@ class LocalImpl:
             self.db.commit()
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            return ResponseNOK(message="Error, User cannot be deleted", code=417)
-        return ResponseOK(message="User deleted successfully", code=201)
+            return ResponseNOK(message="User cannot be deleted.", code=417)
+        return ResponseOK(message="User deleted successfully.", code=201)
 
     def is_token_black_listed(self, token: str) -> bool:
         try:
@@ -205,7 +210,7 @@ class LocalImpl:
 
         if payload is None or self.is_token_black_listed(bearer_token.token):
             self.log.log_error_message(
-                "Non existent payload or token is in black list.", self.module
+                "Nonexistent payload or token included in black list.", self.module
             )
             return True
 
@@ -240,9 +245,9 @@ class LocalImpl:
 
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            return ResponseNOK(message="Error, Message not created", code=417)
+            return ResponseNOK(message="Message not created.", code=417)
 
-        return ResponseOK(message="Message Create successfully", code=201)
+        return ResponseOK(value=str(new_message.id), message="Message created successfully.", code=201)
 
     def update_message(self, message: Message):
         try:
@@ -260,9 +265,9 @@ class LocalImpl:
 
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            return ResponseNOK(message="Error, Message not updated", code=417)
+            return ResponseNOK(message="Message not updated.", code=417)
 
-        return ResponseOK(message="Message Updated successfully", code=201)
+        return ResponseOK(message="Message updated successfully.", code=201)
 
     def delete_message(self, message_id: int):
         try:
@@ -272,7 +277,7 @@ class LocalImpl:
                 .first()
             )
             if message is None:
-                return ResponseOK(message="Message doesn't exist", code=200)
+                return ResponseOK(message="Nonexistent message.", code=200)
 
             self.db.delete(message)
             self.db.commit()
@@ -280,46 +285,70 @@ class LocalImpl:
         except Exception as e:
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message=f"Error: {str(e)}", code=417)
-        return ResponseOK(message="Message deleted successfully", code=200)
+        return ResponseOK(message="Message deleted successfully.", code=200)
 
     def send_message(
-        self, messsage_id: int, category_id: int, is_for_all_categories: bool
+        self, message_id: int, category_id: int, is_for_all_categories: bool
     ):
         try:
             create_relation = False
+            receipt_found = False
+
             existing_persons = self.db.query(model_person).all()
             for p in existing_persons:
                 if is_for_all_categories:
+                    receipt_found = True
                     create_relation = True
                 else:
-                    if category_id == Category.diabetic and p.is_diabetic:
+                    if category_id == CategoryEnum.diabetic.value and p.is_diabetic:
+                        receipt_found = True
                         create_relation = True
                     else:
-                        if category_id == Category.hypertensive and p.is_hypertensive:
+                        if category_id == CategoryEnum.hypertensive.value and p.is_hypertensive:
+                            receipt_found = True
                             create_relation = True
                         else:
                             if (
-                                category_id == Category.chronic_respiratory_disease
+                                category_id == CategoryEnum.chronic_respiratory_disease.value
                                 and p.is_chronic_respiratory_disease
                             ):
+                                receipt_found = True
                                 create_relation = True
                             else:
                                 if (
-                                    category_id == Category.chronic_kidney_disease
+                                    category_id == CategoryEnum.chronic_kidney_disease.value
                                     and p.is_chronic_kidney_disease
                                 ):
+                                    receipt_found = True
                                     create_relation = True
                 if create_relation:
+
                     new_person_message = model_person_message()
                     new_person_message.id_person = p.id
-                    new_person_message.id_message = messsage_id
+                    new_person_message.id_message = message_id
+
                     self.db.add(new_person_message)
                     self.db.commit()
+
                 create_relation = False
+
+            if receipt_found:
+
+                message = (
+                    self.db.query(model_message)
+                        .where(model_message.id == message_id)
+                        .first()
+                )
+                if message is None:
+                    return ResponseOK(message="Nonexistent message.", code=200)
+
+                message.sent_datetime = datetime.now()
+                self.db.commit()
+
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            return ResponseNOK(message="Error, Message relation not created", code=417)
-        return ResponseOK(message="Message relation created successfully", code=201)
+            return ResponseNOK(message="Message relation not created.", code=417)
+        return ResponseOK(message="Message relation created successfully.", code=201)
 
     def get_messages(self, person_id: int, only_unread: bool):
         try:
@@ -386,7 +415,7 @@ class LocalImpl:
 
             self.db.commit()
 
-            return ResponseOK(message="Message set read successfully", code=201)
+            return ResponseOK(message="Message set read successfully.", code=201)
         except Exception as e:
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message=f"Error: {str(e)}", code=417)
@@ -397,18 +426,18 @@ class LocalImpl:
                 model_person.identification_number==person.identification_number).first()
         )
         if buff_person is not None:
-            return ResponseNOK(message="Person already exist", code=417)
+            return ResponseNOK(value="", message="Person already exists.", code=417)
         try:
             new_person = model_person(**person.dict())
 
             self.db.add(new_person)
             self.db.commit()
 
-            return schema_create_person_response.from_orm(new_person)
+            return ResponseOK(value=str(new_person.id), message="Person created successfully.", code=201)
 
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            return ResponseNOK(message="Error, person not created", code=417)
+            return ResponseNOK(value="", message="Person not created.", code=417)
 
     def update_person(self, person: schema_person) -> Union[schema_person, ResponseNOK]:
 
@@ -463,10 +492,13 @@ class LocalImpl:
                 .where(model_person.id == existing_person.id)
                 .first()
             )
+
+            return ResponseOK(value=str(existing_person.id), message="Person updated successfully.", code=201)
+
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            return ResponseNOK(message="Error, User not created", code=417)
-        return schema_person.from_orm(value)
+            return ResponseNOK(message="Person cannot be updated.", code=417)
+
 
     def delete_person(self, person_id: int):
         try:
@@ -479,8 +511,8 @@ class LocalImpl:
             self.db.commit()
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            return ResponseNOK(message="Error, Person cannot be deleted", code=417)
-        return ResponseOK(message="Person deleted successfully", code=201)
+            return ResponseNOK(message="Person cannot be deleted.", code=417)
+        return ResponseOK(message="Person deleted successfully.", code=201)
 
     def get_person_by_id(self, person_id: int):
         return self.get_person(person_id, None, True)
@@ -526,8 +558,9 @@ class LocalImpl:
         except Exception as e:
             self.log.log_error_message(e, self.module)
             return ResponseNOK(
-                message=f"Person cannot be retrieve. Error: {str(e)}", code=417
+                message=f"Person cannot be retrieved. Error: {str(e)}", code=417
             )
+
         return existing_person
 
     def set_admin_status_to_person(self, person_id: int, admin_status_id: int):
@@ -542,7 +575,7 @@ class LocalImpl:
             return ResponseNOK(
                 message=f"Person cannot be updated. Error: {str(e)}", code=417
             )
-        return schema_person.from_orm(existing_person)
+        return ResponseOK(message="Admin status set successfully.", code=201)
 
     def create_person_and_user(self, person_user: schema_person_user):
         person = (
@@ -552,11 +585,11 @@ class LocalImpl:
             ).first()
         )
         if person is not None:
-            return ResponseNOK(message="Person already exist", code=417)
+            return ResponseNOK(message="Person already exists.", code=417)
 
         user = self.db.query(model_user).where(model_user.username==person_user.username).first()
         if user is not None:
-            return ResponseNOK(message="Username already exist", code=417)
+            return ResponseNOK(message="Username already exists.", code=417)
         try:
             new_person = model_person(
                 None,
@@ -606,10 +639,50 @@ class LocalImpl:
             self.db.add(new_user)
             self.db.commit()
 
-            return schema_create_person_response.from_orm(value)
+            return ResponseOK(value=str(new_person.id), message="Person and user created successfully.", code=201)
 
         except Exception as e:
-            return ResponseNOK(message=f"Person cannot be created. Error: {str(e)}", code=417)
+            return ResponseNOK(message=f"Person and user cannot be created. Error: {str(e)}", code=417)
+
+    def get_person_status(self):
+            try:
+                result = []
+                collection = self.db.query(model_person_status).all()
+
+                for u in collection:
+                    result.append({"id": u.id, "name": u.name})
+
+                return result
+
+            except Exception as e:
+                self.log.log_error_message(e, self.module)
+                return ResponseNOK(message=f"Error: {str(e)}", code=417)
+
+    def get_roles(self):
+            try:
+                result = []
+                collection = self.db.query(model_role).all()
+
+                for u in collection:
+                    result.append({"id": u.id, "name": u.name})
+
+                return result
+            except Exception as e:
+                self.log.log_error_message(e, self.module)
+                return ResponseNOK(message=f"Error: {str(e)}", code=417)
+
+    def get_categories(self):
+            try:
+                result = []
+                collection = self.db.query(model_category).all()
+
+                for u in collection:
+                    result.append({"id": u.id, "name": u.name})
+
+                return result
+            except Exception as e:
+                self.log.log_error_message(e, self.module)
+                return ResponseNOK(message=f"Error: {str(e)}", code=417)
 
     async def upload_identification_images(
         self,
@@ -654,4 +727,4 @@ class LocalImpl:
         except Exception as e:
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message=f"Error: {str(e)}", code=417)
-        return ResponseOK(message="File upload successfully", code=201)
+        return ResponseOK(message="Files uploaded successfully.", code=201)

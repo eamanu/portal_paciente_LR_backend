@@ -2,12 +2,14 @@ from pydantic import BaseModel
 
 
 class ResponseOK(BaseModel):
+    value: str = ""
     message: str
     code: int
     status: bool = True
 
 
 class ResponseNOK(BaseModel):
+    value: str = ""
     message: str
     code: int
     status: bool = False
