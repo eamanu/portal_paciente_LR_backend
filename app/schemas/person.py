@@ -163,6 +163,7 @@ class PersonFamily(BaseModel):
 
 
 class PersonLogged(BaseModel):
+    id_person: int
     access_token: str
     token_type: str
     data: PersonFamily

@@ -23,6 +23,9 @@ from app.schemas.person_user import PersonUser as schema_person_user
 from app.schemas.responses import HTTPError
 from app.schemas.responses import ResponseOK, ResponseNOK
 from app.schemas.token import Token
+from app.schemas.person_status import PersonStatus
+from app.schemas.role import Role
+from app.schemas.category import Category
 from app.schemas.user import User as schema_user
 from pathlib import Path
 
@@ -77,10 +80,9 @@ async def logout(token: str = Depends(oauth_schema)):
         raise credentials_exception
 
 
-@router_local.post(
-    "/createuser", response_model=ResponseOK, responses={417: {"model": ResponseNOK}}, tags=["User and person"])
-async def create_user(user: schema_user):
-    return LocalImpl().create_user(user)
+#@router_local.post("/createuser", response_model=ResponseOK, responses={417: {"model": ResponseNOK}}, tags=["User and person"])
+#async def create_user(user: schema_user):
+#    return LocalImpl().create_user(user)
 
 
 @router_local.post(
@@ -157,7 +159,7 @@ async def set_message_read(person_id: int, message_id: int):
 
 @router_local.post(
     "/createperson",
-    response_model=schema_create_person_response,
+    response_model=ResponseOK,
     responses={417: {"model": ResponseNOK}}, tags=["User and person"]
 )
 async def create_person(person: schema_create_person):
@@ -166,7 +168,7 @@ async def create_person(person: schema_create_person):
 
 @router_local.put(
     "/updateperson",
-    response_model=schema_person,
+    response_model=ResponseOK,
     responses={417: {"model": ResponseNOK}}, tags=["User and person"]
 )
 async def update_person(person: schema_person):
@@ -180,19 +182,23 @@ async def delete_person(person_id: int):
     return LocalImpl().delete_person(person_id)
 
 
-@router_local.get("/getpersonbyid", tags=["User and person"])
+@router_local.get("/getpersonbyid",
+                  response_model=schema_person,
+                  tags=["User and person"])
 async def get_person_by_id(person_id: int):
     return LocalImpl().get_person_by_id(person_id)
 
 
-@router_local.get("/getpersonbyidentificationnumber", tags=["User and person"])
+@router_local.get("/getpersonbyidentificationnumber",
+                  response_model=schema_person,
+                  tags=["User and person"])
 async def get_person_by_identification_number(person_identification_number: str):
     return LocalImpl().get_person_by_identification_number(person_identification_number)
 
 
 @router_local.put(
     "/setadminstatustoperson",
-    response_model=schema_person,
+    response_model=ResponseOK,
     responses={417: {"model": ResponseNOK}}, tags=["Admin"]
 )
 async def set_admin_status_to_person(person_id: int, admin_status_id: int):
@@ -201,12 +207,35 @@ async def set_admin_status_to_person(person_id: int, admin_status_id: int):
 
 @router_local.post(
     "/createpersonanduser",
-    response_model=schema_create_person_response,
+    response_model=ResponseOK,
     responses={417: {"model": ResponseNOK}}, tags=["User and person"]
 )
 async def create_person_and_user(person_user: schema_person_user):
     return LocalImpl().create_person_and_user(person_user)
 
+@router_local.get(
+    "/getpersonstatus",
+    response_model=List[PersonStatus],
+    responses={417: {"model": ResponseNOK}}, tags=["User and person"]
+)
+async def get_person_status():
+    return LocalImpl().get_person_status()
+
+@router_local.get(
+    "/getroles",
+    response_model=List[Role],
+    responses={417: {"model": ResponseNOK}}, tags=["User and person"]
+)
+async def get_roles():
+    return LocalImpl().get_roles()
+
+@router_local.get(
+    "/getcategories",
+    response_model=List[Category],
+    responses={417: {"model": ResponseNOK}}, tags=["User and person"]
+)
+async def get_categories():
+    return LocalImpl().get_categories()
 
 @router_local.post("/uploadidentificationimages",
     response_model=ResponseOK,

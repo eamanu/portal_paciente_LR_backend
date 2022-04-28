@@ -57,5 +57,7 @@ def login_person(
         member.__dict__ for member in family.family_group
     ]  # to pydantic
     return PersonLogged(
-        access_token=access_token, token_type="bearer", data=family.__dict__
-    )
+        id_person=user.id_person,
+        access_token=access_token,
+        token_type="bearer",
+        data=family.__dict__)
