@@ -8,6 +8,8 @@ from app.config.config import DATABASE_DEFAULT, DATABASE_URL
 
 # endregion
 
+#region DB settings
+
 SQLITE = 'sqlite'
 MYSQL = 'mysql'
 
@@ -20,19 +22,6 @@ conn = engine.connect()
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
-from app.models import (  # noqa
-    category,
-    expiration_black_list,
-    message,
-    permission,
-    role,
-    role_permission,
-    user,
-    user_category,
-    user_front_end,
-    user_message,
-    user_role,
-)
 
 meta = MetaData()
 

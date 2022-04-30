@@ -15,7 +15,9 @@ class HSI_Impl:
 
     @property
     def headers(self):
-        return {"accept": "*/*", "Authorization": self.token}
+        return {"accept": "*/*",
+                "Accept-Encoding": "deflate",
+                "Authorization": self.token}
 
     def get_generic(self, endpoint, payload=None) -> Dict:
         if payload is None:

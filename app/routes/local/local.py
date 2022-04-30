@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List
 
-from fastapi import Depends, HTTPException, Request, status, File, UploadFile
+from fastapi import Depends, HTTPException, status, File, UploadFile
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
@@ -11,20 +11,33 @@ from app.gear.local.local_impl import LocalImpl
 from app.main import get_db
 from app.routes import auth
 from app.routes.common import router_local
+from app.schemas.message import Message
 from app.schemas.message import ReadMessage
 from app.schemas.person import (
     Person as schema_person,
-    CreatePerson as schema_create_person
+    CreatePerson as schema_create_person,
+    CreatePersonResponse as schema_create_person_response
 )
+from app.schemas.person import PersonLogged
 from app.schemas.person_user import PersonUser as schema_person_user
+from app.schemas.responses import HTTPError
 from app.schemas.responses import ResponseOK, ResponseNOK
 from app.schemas.token import Token
+from app.schemas.person_status import PersonStatus
+from app.schemas.role import Role
+from app.schemas.category import Category
 from app.schemas.user import User as schema_user
-from app.schemas.person import PersonLogged
-from app.schemas.responses import HTTPError
+from pathlib import Path
 
 
 oauth_schema = OAuth2PasswordBearer(tokenUrl="/login")
+
+
+@router_local.get("/version")
+async def version():
+    with open(Path("./app/VERSION"), "r") as f:
+        version = f.read().strip()
+    return {"version": version}
 
 
 @router_local.post(
@@ -67,33 +80,87 @@ async def logout(token: str = Depends(oauth_schema)):
         raise credentials_exception
 
 
+#@router_local.post("/createuser", response_model=ResponseOK, responses={417: {"model": ResponseNOK}}, tags=["User and person"])
+#async def create_user(user: schema_user):
+#    return LocalImpl().create_user(user)
+
+
 @router_local.post(
-    "/createuser", response_model=ResponseOK, responses={417: {"model": ResponseNOK}}
+    "/createmessage",
+    response_model=ResponseOK,
+    responses={417: {"model": ResponseNOK}}, tags=["Message"]
 )
-async def create_user(user: schema_user):
-    return LocalImpl().create_user(user)
+async def create_message(header: str, body: str, is_formatted: bool):
+    return LocalImpl().create_message(header, body, is_formatted)
+
+
+@router_local.put(
+    "/updatemessage",
+    response_model=ResponseOK,
+    responses={417: {"model": ResponseNOK}}, tags=["Message"]
+)
+async def update_message(message: Message):
+    return LocalImpl().update_message(message)
+
+
+@router_local.put(
+    "/deletemessage",
+    response_model=ResponseOK,
+    responses={417: {"model": ResponseNOK}}, tags=["Message"]
+)
+async def delete_message(message_id: int):
+    return LocalImpl().delete_message(message_id)
+
+
+@router_local.post(
+    "/sendmessage",
+    response_model=ResponseOK,
+    responses={417: {"model": ResponseNOK}}, tags=["Message"]
+)
+async def send_message(message_id: int, category_id: int, is_for_all_categories: bool):
+    return LocalImpl().send_message(message_id, category_id, is_for_all_categories)
 
 
 @router_local.get(
-    "/getmessages",
+    "/get-messages-by-person",
     response_model=List[ReadMessage],
-    responses={417: {"model": ResponseNOK}},
+    responses={417: {"model": ResponseNOK}}, tags=["Message"]
 )
-async def get_messages(only_unread: bool, request: Request):
-    return LocalImpl().get_messages(only_unread, request)
+async def get_messages_by_person(person_id: int, only_unread: bool):
+    return LocalImpl().get_messages(person_id, only_unread)
+
+
+@router_local.get(
+    "/getmessage",
+    response_model=Message,
+    responses={417: {"model": ResponseNOK}}, tags=["Message"]
+)
+async def get_message(message_id: int):
+    return LocalImpl().get_message(message_id)
+
+
+@router_local.get(
+    "/get-all-messages",
+    response_model=List[Message],
+    responses={417: {"model": ResponseNOK}}, tags=["Message"]
+)
+async def get_all_messages():
+    return LocalImpl().get_all_messages()
 
 
 @router_local.post(
-    "/setmessagesread",
+    "/setmessageread",
     response_model=ResponseOK,
-    responses={417: {"model": ResponseNOK}},
+    responses={417: {"model": ResponseNOK}}, tags=["Message"]
 )
-async def set_messages_read(request: Request, message_id: int):
-    return LocalImpl().set_messages_read(request, message_id)
+async def set_message_read(person_id: int, message_id: int):
+    return LocalImpl().set_message_read(person_id, message_id)
 
 
 @router_local.post(
-    "/createperson", response_model=ResponseOK, responses={417: {"model": ResponseNOK}}
+    "/createperson",
+    response_model=ResponseOK,
+    responses={417: {"model": ResponseNOK}}, tags=["User and person"]
 )
 async def create_person(person: schema_create_person):
     return LocalImpl().create_person(person)
@@ -101,34 +168,38 @@ async def create_person(person: schema_create_person):
 
 @router_local.put(
     "/updateperson",
-    response_model=schema_person,
-    responses={417: {"model": ResponseNOK}},
+    response_model=ResponseOK,
+    responses={417: {"model": ResponseNOK}}, tags=["User and person"]
 )
 async def update_person(person: schema_person):
     return LocalImpl().update_person(person)
 
 
 @router_local.put(
-    "/deleteperson", response_model=ResponseOK, responses={417: {"model": ResponseNOK}}
+    "/deleteperson", response_model=ResponseOK, responses={417: {"model": ResponseNOK}}, tags=["User and person"]
 )
 async def delete_person(person_id: int):
     return LocalImpl().delete_person(person_id)
 
 
-@router_local.get("/getpersonbyid")
+@router_local.get("/getpersonbyid",
+                  response_model=schema_person,
+                  tags=["User and person"])
 async def get_person_by_id(person_id: int):
     return LocalImpl().get_person_by_id(person_id)
 
 
-@router_local.get("/getpersonbyidentificationnumber")
+@router_local.get("/getpersonbyidentificationnumber",
+                  response_model=schema_person,
+                  tags=["User and person"])
 async def get_person_by_identification_number(person_identification_number: str):
     return LocalImpl().get_person_by_identification_number(person_identification_number)
 
 
 @router_local.put(
     "/setadminstatustoperson",
-    response_model=schema_person,
-    responses={417: {"model": ResponseNOK}},
+    response_model=ResponseOK,
+    responses={417: {"model": ResponseNOK}}, tags=["Admin"]
 )
 async def set_admin_status_to_person(person_id: int, admin_status_id: int):
     return LocalImpl().set_admin_status_to_person(person_id, admin_status_id)
@@ -137,14 +208,38 @@ async def set_admin_status_to_person(person_id: int, admin_status_id: int):
 @router_local.post(
     "/createpersonanduser",
     response_model=ResponseOK,
-    responses={417: {"model": ResponseNOK}},
+    responses={417: {"model": ResponseNOK}}, tags=["User and person"]
 )
 async def create_person_and_user(person_user: schema_person_user):
     return LocalImpl().create_person_and_user(person_user)
 
+@router_local.get(
+    "/getpersonstatus",
+    response_model=List[PersonStatus],
+    responses={417: {"model": ResponseNOK}}, tags=["User and person"]
+)
+async def get_person_status():
+    return LocalImpl().get_person_status()
+
+@router_local.get(
+    "/getroles",
+    response_model=List[Role],
+    responses={417: {"model": ResponseNOK}}, tags=["User and person"]
+)
+async def get_roles():
+    return LocalImpl().get_roles()
+
+@router_local.get(
+    "/getcategories",
+    response_model=List[Category],
+    responses={417: {"model": ResponseNOK}}, tags=["User and person"]
+)
+async def get_categories():
+    return LocalImpl().get_categories()
 
 @router_local.post("/uploadidentificationimages",
     response_model=ResponseOK,
-    responses={417: {"model": ResponseNOK}})
-async def upload_identification_images(person_id: str, file: UploadFile = File(...), file2: UploadFile = File(...)):
-    return await LocalImpl().upload_identification_images(person_id, file, file2)
+    responses={417: {"model": ResponseNOK}}, tags=["User and person"])
+async def upload_identification_images(person_id: str, file1: UploadFile = File(...), file2: UploadFile = File(...)):
+    return await LocalImpl().upload_identification_images(person_id, file1, file2)
+

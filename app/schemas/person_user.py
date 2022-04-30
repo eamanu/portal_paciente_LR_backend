@@ -29,6 +29,7 @@ class PersonUser(BaseModel):
     department: Optional[str]
     locality: Optional[str]
     email: Optional[str]
+    id_person_status: Optional[int]
     #####################
     # User
     #####################
