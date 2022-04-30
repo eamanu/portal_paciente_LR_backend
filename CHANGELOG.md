@@ -1,6 +1,9 @@
 # CHANGELOG
 
-## 1.1.2
+# develop
+* Agregado de dos campos nuevos en person para almacenar info de archivos subidos.
+
+## 1.2.0
 * Fix del request a HCE Get patient Data
 
 ## 1.1.1
