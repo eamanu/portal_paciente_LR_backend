@@ -49,3 +49,18 @@ LOCAL_FILE_UPLOAD_DIRECTORY = os.getenv("TMP_FILES_UPLOAD")
 LOCAL_FILE_DOWNLOAD_DIRECTORY = os.getenv("TMP_FILES_DOWNLOAD")
 
 # endregion
+
+# region mail configuration
+# TODO: Esto va a dejar de funcionar le 30 de mayo
+MAIL_USERNAME = os.getenv("MAIL_USERNAME", "")
+MAIL_FROM = os.getenv("MAIL_FROM", "no@mail.com")  # ConnectionConfig object need it as a valid mail format
+MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "")
+MAIL_PORT = os.getenv("MAIL_PORT", 123)
+MAIL_SERVER = os.getenv("MAIL_SERVER", "")
+# endregion
+
+# region validation-mail
+SERVER_IP = os.getenv("SERVER_IP", "http://127.0.0.1:8000")
+VALIDATION_ENDPOINT = os.getenv("VALIDATION_ENDPOINT", "/portalpaciente/api/v1/validate-email")
+VALIDATION_MAIL_URL = f"{SERVER_IP}{VALIDATION_ENDPOINT}"
+# endregion

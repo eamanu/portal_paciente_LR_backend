@@ -2,6 +2,9 @@
 
 # develop
 * Agregado de dos campos nuevos en person para almacenar info de archivos subidos.
+* Se agrega feature de validación de email. Este se realiza durante el upload de las imagenes
+del DNI. Se crea el endpoint "/validate-email" que recibe el token generado para validar
+el mail.
 
 ## 1.2.0
 * Fix del request a HCE Get patient Data

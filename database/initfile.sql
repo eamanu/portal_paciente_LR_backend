@@ -346,6 +346,7 @@ CREATE TABLE `user` (
   `id_person` bigint(20) NULL,
   `id_user_status` bigint(20) NULL,
   `is_admin` bigint(20) NULL DEFAULT 0,
+  `is_mail_validate` bigint(20) NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
