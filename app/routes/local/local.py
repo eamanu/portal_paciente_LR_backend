@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 from typing import List
 
 from fastapi import Depends, HTTPException, status, File, UploadFile
@@ -8,30 +9,32 @@ from sqlalchemy.orm import Session
 
 from app.config.config import SECRET_KEY, ALGORITHM
 from app.gear.local.local_impl import LocalImpl
+from app.gear.log.main_logger import MainLogger, logging
+from app.gear.mailer.mailer import validate_email
+from app.gear.recover_password.recover_password import send_recovery_password_mail, recover_password
 from app.main import get_db
 from app.routes import auth
 from app.routes.common import router_local
+from app.schemas.category import Category
 from app.schemas.message import Message
 from app.schemas.message import ReadMessage
 from app.schemas.person import (
     Person as schema_person,
     CreatePerson as schema_create_person,
-    CreatePersonResponse as schema_create_person_response,
 )
 from app.schemas.person import PersonLogged
+from app.schemas.person_status import PersonStatus
 from app.schemas.person_user import PersonUser as schema_person_user
 from app.schemas.responses import HTTPError
 from app.schemas.responses import ResponseOK, ResponseNOK
-from app.schemas.token import Token
-from app.schemas.person_status import PersonStatus
 from app.schemas.role import Role
-from app.schemas.category import Category
-from app.schemas.user import User as schema_user
-from pathlib import Path
-from app.gear.mailer.mailer import send_validation_mail, validate_email
+from app.schemas.token import Token
 
 
 oauth_schema = OAuth2PasswordBearer(tokenUrl="/login")
+
+log = MainLogger()
+module = logging.getLogger(__name__)
 
 
 @router_local.get("/version")
@@ -281,3 +284,17 @@ async def upload_identification_images(
 @router_local.get("/validate-email/{token}/", tags=["User and person"])
 async def val_email(token: str):
     return await validate_email(token)
+
+
+@router_local.get("/recover-password", tags=["User and person"])
+async def send_email_to_recover_password(email: str):
+    result = await send_recovery_password_mail(email)
+    if not result:
+        log.log_info_message("Mail don't sent to recover password", module)
+
+    return ResponseOK(message="A email was sent you if the email exists in the system.", code=200)
+
+
+@router_local.get("/change-password", tags=["User and person"])
+async def change_password_password(token: str, password: str):
+    return await recover_password(token, password)

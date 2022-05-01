@@ -5,6 +5,11 @@
 * Se agrega feature de validación de email. Este se realiza durante el upload de las imagenes
 del DNI. Se crea el endpoint "/validate-email" que recibe el token generado para validar
 el mail.
+* Se agrega la feature de cambio de password. Para ello se utiliza el endpoint "/recover-password"
+que solo retorna un ReponseOK, y no expone ningún resultado, si es que el mail no existe o es 
+admin, o no está validado, para no tener un leak de información.
+  * Se agrega el endpoint "/change-password" que recibe el token enviado al mail más la nueva
+  contraseña.
 
 ## 1.2.0
 * Fix del request a HCE Get patient Data

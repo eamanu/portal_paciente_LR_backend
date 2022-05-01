@@ -64,3 +64,8 @@ SERVER_IP = os.getenv("SERVER_IP", "http://127.0.0.1:8000")
 VALIDATION_ENDPOINT = os.getenv("VALIDATION_ENDPOINT", "/portalpaciente/api/v1/validate-email")
 VALIDATION_MAIL_URL = f"{SERVER_IP}{VALIDATION_ENDPOINT}"
 # endregion
+
+# regeion recover-password
+RECOVERY_ENDPOINT = os.getenv("RECOVERY_ENDPOINT", "/portalpaciente/api/v1/recovery-password")
+RECOVERY_PASSWORD_URL = f"{SERVER_IP}{RECOVERY_ENDPOINT}"
+# endregion
