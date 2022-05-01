@@ -1,6 +1,6 @@
 # CHANGELOG
 
-# develop
+## 1.3.0
 * Agregado de dos campos nuevos en person para almacenar info de archivos subidos.
 * Se agrega feature de validación de email. Este se realiza durante el upload de las imagenes
 del DNI. Se crea el endpoint "/validate-email" que recibe el token generado para validar
@@ -12,6 +12,14 @@ admin, o no está validado, para no tener un leak de información.
   contraseña.
 
 ## 1.2.0
+* Cuando se crea la persona: retorna el id.
+* Se agrega el id de persona en el login.
+* Categorias: nuevo endpoint.
+* Estados de personas: nuevo endpoint.
+* Cuando se crea el mensaje: retorna el id.
+* Agregar a mensajes un atributo que diga cuándo un mensaje se envió.
+
+## 1.1.2
 * Fix del request a HCE Get patient Data
 
 ## 1.1.1
