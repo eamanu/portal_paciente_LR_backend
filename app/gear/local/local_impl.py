@@ -1,11 +1,11 @@
 import base64
-import json
+import uuid
 
 from datetime import datetime, timedelta
 from typing import Optional, Union
 
 from fastapi import Request, status, File, UploadFile
-from fastapi.responses import Response
+from fastapi.responses import Response, FileResponse
 from jose.exceptions import JWTError
 from sqlalchemy.exc import PendingRollbackError
 from sqlalchemy.orm import Session
@@ -15,6 +15,7 @@ from app.config.config import (
     AUTHORIZATION_ENABLED,
     DEBUG_ENABLED,
     LOCAL_FILE_UPLOAD_DIRECTORY,
+    LOCAL_FILE_DOWNLOAD_DIRECTORY,
 )
 from app.config.database import SessionLocal
 from app.gear.local.bearer_token import BearerToken
@@ -35,12 +36,12 @@ from app.schemas.message import Message, ReadMessage
 from app.schemas.person import (
     Person as schema_person,
     CreatePerson as schema_create_person,
-    CreatePersonResponse as schema_create_person_response
+    CreatePersonResponse as schema_create_person_response,
 )
 from app.schemas.person_user import PersonUser as schema_person_user
 from app.schemas.responses import ResponseNOK, ResponseOK
 from app.schemas.user import User as schema_user
-
+from app.gear.mailer.mailer import send_validation_mail
 
 class LocalImpl:
 
@@ -247,7 +248,9 @@ class LocalImpl:
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message="Message not created.", code=417)
 
-        return ResponseOK(value=str(new_message.id), message="Message created successfully.", code=201)
+        return ResponseOK(
+            value=str(new_message.id), message="Message created successfully.", code=201
+        )
 
     def update_message(self, message: Message):
         try:
@@ -304,19 +307,24 @@ class LocalImpl:
                         receipt_found = True
                         create_relation = True
                     else:
-                        if category_id == CategoryEnum.hypertensive.value and p.is_hypertensive:
+                        if (
+                            category_id == CategoryEnum.hypertensive.value
+                            and p.is_hypertensive
+                        ):
                             receipt_found = True
                             create_relation = True
                         else:
                             if (
-                                category_id == CategoryEnum.chronic_respiratory_disease.value
+                                category_id
+                                == CategoryEnum.chronic_respiratory_disease.value
                                 and p.is_chronic_respiratory_disease
                             ):
                                 receipt_found = True
                                 create_relation = True
                             else:
                                 if (
-                                    category_id == CategoryEnum.chronic_kidney_disease.value
+                                    category_id
+                                    == CategoryEnum.chronic_kidney_disease.value
                                     and p.is_chronic_kidney_disease
                                 ):
                                     receipt_found = True
@@ -336,8 +344,8 @@ class LocalImpl:
 
                 message = (
                     self.db.query(model_message)
-                        .where(model_message.id == message_id)
-                        .first()
+                    .where(model_message.id == message_id)
+                    .first()
                 )
                 if message is None:
                     return ResponseOK(message="Nonexistent message.", code=200)
@@ -357,10 +365,9 @@ class LocalImpl:
                 .join(
                     model_person_message,
                     model_person_message.id_message == model_message.id,
-                ).join(
-                    model_person,
-                    model_person.id == model_person_message.id_person
-                ).where(model_person.id == person_id)
+                )
+                .join(model_person, model_person.id == model_person_message.id_person)
+                .where(model_person.id == person_id)
             )
 
             result = []
@@ -422,8 +429,9 @@ class LocalImpl:
 
     def create_person(self, person: schema_create_person):
         buff_person = (
-            self.db.query(model_person).where(
-                model_person.identification_number==person.identification_number).first()
+            self.db.query(model_person)
+            .where(model_person.identification_number == person.identification_number)
+            .first()
         )
         if buff_person is not None:
             return ResponseNOK(value="", message="Person already exists.", code=417)
@@ -433,13 +441,17 @@ class LocalImpl:
             self.db.add(new_person)
             self.db.commit()
 
-            return ResponseOK(value=str(new_person.id), message="Person created successfully.", code=201)
+            return ResponseOK(
+                value=str(new_person.id),
+                message="Person created successfully.",
+                code=201,
+            )
 
         except Exception as e:
             self.log.log_error_message(e, self.module)
             return ResponseNOK(value="", message="Person not created.", code=417)
 
-    def update_person(self, person: schema_person) -> Union[schema_person, ResponseNOK]:
+    def update_person(self, person: schema_person) -> Union[ResponseOK, ResponseNOK]:
 
         try:
             updated_person = model_person(**person.dict())
@@ -487,18 +499,15 @@ class LocalImpl:
             existing_person.id_person_status = updated_person.id_person_status
 
             self.db.commit()
-            value = (
-                self.db.query(model_person)
-                .where(model_person.id == existing_person.id)
-                .first()
+            return ResponseOK(
+                value=str(existing_person.id),
+                message="Person updated successfully.",
+                code=201,
             )
-
-            return ResponseOK(value=str(existing_person.id), message="Person updated successfully.", code=201)
 
         except Exception as e:
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message="Person cannot be updated.", code=417)
-
 
     def delete_person(self, person_id: int):
         try:
@@ -537,7 +546,8 @@ class LocalImpl:
                 existing_person = (
                     self.db.query(model_person)
                     .where(
-                        model_person.identification_number == person_identification_number
+                        model_person.identification_number
+                        == person_identification_number
                     )
                     .first()
                 )
@@ -550,7 +560,11 @@ class LocalImpl:
                 )
                 .all()
             )
-            filter_family = [person for person in family_group if person.identification_number != identification_number]
+            filter_family = [
+                person
+                for person in family_group
+                if person.identification_number != identification_number
+            ]
 
             if family_group != "[]":
                 existing_person.family_group = filter_family
@@ -579,15 +593,21 @@ class LocalImpl:
 
     def create_person_and_user(self, person_user: schema_person_user):
         person = (
-            self.db.query(model_person).where(
-                model_person.identification_number==person_user.identification_number or
-                model_person.email==person_user.email
-            ).first()
+            self.db.query(model_person)
+            .where(
+                model_person.identification_number == person_user.identification_number
+                or model_person.email == person_user.email
+            )
+            .first()
         )
         if person is not None:
             return ResponseNOK(message="Person already exists.", code=417)
 
-        user = self.db.query(model_user).where(model_user.username==person_user.username).first()
+        user = (
+            self.db.query(model_user)
+            .where(model_user.username == person_user.username)
+            .first()
+        )
         if user is not None:
             return ResponseNOK(message="Username already exists.", code=417)
         try:
@@ -639,50 +659,56 @@ class LocalImpl:
             self.db.add(new_user)
             self.db.commit()
 
-            return ResponseOK(value=str(new_person.id), message="Person and user created successfully.", code=201)
+            return ResponseOK(
+                value=str(new_person.id),
+                message="Person and user created successfully.",
+                code=201,
+            )
 
         except Exception as e:
-            return ResponseNOK(message=f"Person and user cannot be created. Error: {str(e)}", code=417)
+            return ResponseNOK(
+                message=f"Person and user cannot be created. Error: {str(e)}", code=417
+            )
 
     def get_person_status(self):
-            try:
-                result = []
-                collection = self.db.query(model_person_status).all()
+        try:
+            result = []
+            collection = self.db.query(model_person_status).all()
 
-                for u in collection:
-                    result.append({"id": u.id, "name": u.name})
+            for u in collection:
+                result.append({"id": u.id, "name": u.name})
 
-                return result
+            return result
 
-            except Exception as e:
-                self.log.log_error_message(e, self.module)
-                return ResponseNOK(message=f"Error: {str(e)}", code=417)
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
+            return ResponseNOK(message=f"Error: {str(e)}", code=417)
 
     def get_roles(self):
-            try:
-                result = []
-                collection = self.db.query(model_role).all()
+        try:
+            result = []
+            collection = self.db.query(model_role).all()
 
-                for u in collection:
-                    result.append({"id": u.id, "name": u.name})
+            for u in collection:
+                result.append({"id": u.id, "name": u.name})
 
-                return result
-            except Exception as e:
-                self.log.log_error_message(e, self.module)
-                return ResponseNOK(message=f"Error: {str(e)}", code=417)
+            return result
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
+            return ResponseNOK(message=f"Error: {str(e)}", code=417)
 
     def get_categories(self):
-            try:
-                result = []
-                collection = self.db.query(model_category).all()
+        try:
+            result = []
+            collection = self.db.query(model_category).all()
 
-                for u in collection:
-                    result.append({"id": u.id, "name": u.name})
+            for u in collection:
+                result.append({"id": u.id, "name": u.name})
 
-                return result
-            except Exception as e:
-                self.log.log_error_message(e, self.module)
-                return ResponseNOK(message=f"Error: {str(e)}", code=417)
+            return result
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
+            return ResponseNOK(message=f"Error: {str(e)}", code=417)
 
     async def upload_identification_images(
         self,
@@ -690,6 +716,15 @@ class LocalImpl:
         file1: UploadFile = File(...),
         file2: UploadFile = File(...),
     ):
+        existing_person = (
+            self.db.query(model_person).where(model_person.id == person_id).first()
+        )
+
+        if existing_person is None:
+            return ResponseNOK(
+                message=f"Nonexistent person_id: {str(person_id)}", code=417
+            )
+
         try:
             # File 1 ------------------------------------------------------------------------------------
             destination_file_path = (
@@ -712,17 +747,14 @@ class LocalImpl:
                 b64_string_file2 = base64.b64encode(bin_file.read())
 
             # Saving process -----------------------------------------------------------------------------
-            existing_person = (
-                self.db.query(model_person).where(model_person.id == person_id).first()
-            )
-
-            if existing_person is None:
-                return ResponseNOK(message=f"Nonexistent person_id: {str(person_id)}", code=417)
-
             existing_person.identification_front_image = b64_string_file1
             existing_person.identification_back_image = b64_string_file2
-
+            existing_person.identification_front_image_file_type = file1.content_type
+            existing_person.identification_back_image_file_type = file2.content_type
             self.db.commit()
+
+            # validating email
+            await send_validation_mail(person_id)
 
         except Exception as e:
             self.log.log_error_message(e, self.module)
