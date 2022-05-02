@@ -36,8 +36,6 @@ class Person(Base):
     email = Column(String(200), nullable=False)
     identification_front_image = Column(Text, nullable=False)
     identification_back_image = Column(Text, nullable=False)
-    identification_front_image_file_type = Column(String(45), nullable=False)
-    identification_back_image_file_type = Column(String(45), nullable=False)
     id_person_status = Column(Integer, nullable=False)
 
     def __init__(

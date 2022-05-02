@@ -232,8 +232,6 @@ CREATE TABLE `person` (
   `email` varchar(200) COLLATE latin1_spanish_ci DEFAULT NULL,
   `identification_front_image` longtext COLLATE latin1_spanish_ci,
   `identification_back_image` longtext COLLATE latin1_spanish_ci,
-  `identification_front_image_file_type` varchar(45) COLLATE latin1_spanish_ci,
-  `identification_back_image_file_type` varchar(45) COLLATE latin1_spanish_ci,
   `id_person_status` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
@@ -346,7 +344,6 @@ CREATE TABLE `user` (
   `id_person` bigint(20) NULL,
   `id_user_status` bigint(20) NULL,
   `is_admin` bigint(20) NULL DEFAULT 0,
-  `is_mail_validate` bigint(20) NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
