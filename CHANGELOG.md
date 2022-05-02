@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.31.1
+* Fix dependencies.
+
 ## 1.3.0
 * Agregado de dos campos nuevos en person para almacenar info de archivos subidos.
 * Se agrega feature de validación de email. Este se realiza durante el upload de las imagenes
