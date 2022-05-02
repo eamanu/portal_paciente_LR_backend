@@ -1,5 +1,8 @@
 # CHANGELOG
 
+# 1.13.2
+* Bug fixes.
+
 ## 1.31.1
 * Fix dependencies.
 
