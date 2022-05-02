@@ -31,7 +31,7 @@ conf = ConnectionConfig(
     MAIL_SERVER=MAIL_SERVER,
     MAIL_TLS=True,
     MAIL_SSL=False,
-    TEMPLATE_FOLDER=Path(".") / "templates",
+    TEMPLATE_FOLDER=Path("/code/app/templates/"),  # FIXME: fix this
 )
 
 
