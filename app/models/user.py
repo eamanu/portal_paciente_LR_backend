@@ -14,6 +14,7 @@ class User(Base):
     id_person = Column(Integer, nullable=True)
     id_user_status = Column(Integer, nullable=True)
     is_admin = Column(Integer, nullable=False, default=0)
+    is_mail_validate = Column(Integer, nullable=True, default=0)
 
     @staticmethod
     def encrypt_pwd(password):
