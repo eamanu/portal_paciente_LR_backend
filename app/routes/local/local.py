@@ -242,3 +242,10 @@ async def get_categories():
     responses={417: {"model": ResponseNOK}}, tags=["User and person"])
 async def upload_identification_images(person_id: str, file1: UploadFile = File(...), file2: UploadFile = File(...)):
     return await LocalImpl().upload_identification_images(person_id, file1, file2)
+
+@router_local.post("/downloadidentificationimage",
+    response_model=ResponseOK,
+    responses={417: {"model": ResponseNOK}}, tags=["User and person"])
+async def download_identification_image(person_id: str, is_front: bool):
+    return LocalImpl().download_identification_image(person_id, is_front)
+
