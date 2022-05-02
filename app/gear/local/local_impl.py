@@ -760,3 +760,30 @@ class LocalImpl:
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message=f"Error: {str(e)}", code=417)
         return ResponseOK(message="Files uploaded successfully.", code=201)
+
+
+    def download_identification_image(self, person_id: str, is_front: bool):
+        try:
+
+            existing_person = (
+                self.db.query(model_person).where(model_person.id == person_id).first()
+            )
+
+            if existing_person is None:
+                return ResponseNOK(message=f"Nonexistent person_id: {str(person_id)}", code=417)
+
+            destination_file_path = LOCAL_FILE_DOWNLOAD_DIRECTORY
+            file_name = str(uuid.uuid4()) + "." + existing_person.identification_front_image_file_type[
+                                                  (existing_person.identification_front_image_file_type.rfind('/') + 1):]
+
+            base64_img_bytes = existing_person.identification_front_image.encode('utf-8')
+
+            with open(destination_file_path + file_name, 'wb') as file_to_save:
+                decoded_image_data = base64.decodebytes(base64_img_bytes)
+                file_to_save.write(decoded_image_data)
+            file_to_save.close()
+
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
+            return ResponseNOK(message=f"Error: {str(e)}", code=417)
+        return ResponseOK(message="Files downloaded successfully.", code=201)

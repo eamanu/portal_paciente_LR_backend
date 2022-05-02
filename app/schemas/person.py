@@ -36,6 +36,8 @@ class Person(BaseModel):
     identification_front_image_file_type: Optional[str]
     identification_back_image_file_type: Optional[str]
     id_person_status: Optional[int]
+    identification_front_image_file_type: Optional[str]
+    identification_back_image_file_type: Optional[str]
 
     @validator("birthdate", pre=True)
     def parse_birthdate(cls, value):

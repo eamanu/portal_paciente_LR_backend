@@ -281,6 +281,13 @@ async def upload_identification_images(
     return await LocalImpl().upload_identification_images(person_id, file1, file2)
 
 
+@router_local.post("/downloadidentificationimage",
+    response_model=ResponseOK,
+    responses={417: {"model": ResponseNOK}}, tags=["User and person"])
+async def download_identification_image(person_id: str, is_front: bool):
+    return LocalImpl().download_identification_image(person_id, is_front)
+
+
 @router_local.get("/validate-email/{token}/", tags=["User and person"])
 async def val_email(token: str):
     return await validate_email(token)
