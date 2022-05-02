@@ -5,7 +5,7 @@ WORKDIR /code
 
 COPY ./requirements.txt /code/requirements.txt
 
-COPY ./templates/ ./code/templates/
+COPY ./templates/ ./code/app/templates/
 
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
