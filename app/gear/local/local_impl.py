@@ -765,6 +765,7 @@ class LocalImpl:
     def download_identification_image(self, person_id: str, is_front: bool):
         try:
 
+            file_name = None
             existing_person = (
                 self.db.query(model_person).where(model_person.id == person_id).first()
             )
@@ -773,17 +774,30 @@ class LocalImpl:
                 return ResponseNOK(message=f"Nonexistent person_id: {str(person_id)}", code=417)
 
             destination_file_path = LOCAL_FILE_DOWNLOAD_DIRECTORY
-            file_name = str(uuid.uuid4()) + "." + existing_person.identification_front_image_file_type[
-                                                  (existing_person.identification_front_image_file_type.rfind('/') + 1):]
 
-            base64_img_bytes = existing_person.identification_front_image.encode('utf-8')
+            if is_front:
+                if existing_person.identification_front_image_file_type is not None:
+                    file_name = str(uuid.uuid4()) + "." + existing_person.identification_front_image_file_type[
+                                                          (existing_person.identification_front_image_file_type.rfind('/') + 1):]
+                    base64_img_bytes = existing_person.identification_front_image.encode('utf-8')
+            else:
+                if existing_person.identification_back_image_file_type is not None:
+                    file_name = str(uuid.uuid4()) + "." + existing_person.identification_back_image_file_type[
+                                                          (existing_person.identification_back_image_file_type.rfind(
+                                                              '/') + 1):]
+                    base64_img_bytes = existing_person.identification_back_image.encode('utf-8')
 
-            with open(destination_file_path + file_name, 'wb') as file_to_save:
-                decoded_image_data = base64.decodebytes(base64_img_bytes)
-                file_to_save.write(decoded_image_data)
-            file_to_save.close()
+            if file_name is not None:
+                with open(destination_file_path + file_name, 'wb') as file_to_save:
+                    decoded_image_data = base64.decodebytes(base64_img_bytes)
+                    file_to_save.write(decoded_image_data)
+                file_to_save.close()
+            else:
+                return ResponseNOK(message="Nonexistent image.", code=417)
+
+
 
         except Exception as e:
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message=f"Error: {str(e)}", code=417)
-        return ResponseOK(message="Files downloaded successfully.", code=201)
+        return ResponseOK(value="/static/" + file_name, message="File downloaded successfully.", code=201)
