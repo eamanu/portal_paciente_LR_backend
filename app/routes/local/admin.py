@@ -4,12 +4,13 @@ from app.gear.local.admin import (
     not_accept_a_person,
     accept_a_person,
     list_of_persons_to_accept,
-    list_of_persons,
+    list_of_persons_accepted,
+    list_of_persons_in_general
 )
 from app.routes.common import router_admin
-from app.schemas.persons import Person, PersonUsername, ListOfPersons
+from app.schemas.persons import Person, PersonUsername, PersonsReduced
 from app.schemas.returned_object import ReturnMessage
-
+from typing import List
 
 @router_admin.put("/person", name="Create a Person",
                   response_model=ReturnMessage, description="Create a new Person")
@@ -35,13 +36,15 @@ async def accept_person(person_username: PersonUsername):
     return accept_a_person(person_username)
 
 
-@router_admin.get("/persons_accepted", name="List of accepted Person", response_model=ListOfPersons,
-                  description="List of Persons accepted in the system")
+@router_admin.get("/persons_accepted", name="List of accepted Person", response_model=List[PersonsReduced], description="List of Persons accepted in the system")
+async def persons_accepted():
+    return list_of_persons_accepted()
+
+@router_admin.get("/persons_to_be_accepted", name="List of accepted Person", response_model=List[PersonsReduced], description="List of Persons to be accepted in the system")
 async def persons_accepted():
     return list_of_persons_to_accept()
 
-
-@router_admin.get("/persons", name= "List of persons", response_model=ListOfPersons, description="List of all Persons in the system")
+@router_admin.get("/persons", name= "List of persons", response_model=List[PersonsReduced], description="List of all Persons in the system")
 async def persons():
-    return list_of_persons()
+    return list_of_persons_in_general()
 

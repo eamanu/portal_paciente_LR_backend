@@ -535,6 +535,9 @@ class LocalImpl:
         person_identification_number: Optional[str],
         is_by_id: bool,
     ):
+
+        existing_person = None
+
         try:
 
             if is_by_id:
@@ -552,6 +555,9 @@ class LocalImpl:
                     )
                     .first()
                 )
+
+            if existing_person is None:
+                return ResponseNOK(message="Nonexistent Person.", code=417)
 
             identification_number = existing_person.identification_number
 

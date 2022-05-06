@@ -1,6 +1,8 @@
 from app.config.database import SessionLocal
 from sqlalchemy.orm import Session
 from app.schemas.persons import PersonsReduced, Person, PersonUsername
+from app.models.person import Person as model_person
+from app.models.user import User as model_user
 from typing import List
 from app.schemas.returned_object import ReturnMessage
 
@@ -21,39 +23,60 @@ class Persons():
         self.is_deleted = is_deleted
 
 
-def list_of_persons():
+def list_of_persons(only_accepted: bool):
     """
     Return list of persons, only name surname and if is accepted or
     not in the system.
     """
-    persons: List[Persons] = db.query(Persons).where(Persons.is_deleted == False).all()
 
-    return [
-        PersonsReduced(
-            username=person.username,
-            name=person.name,
-            accepted=person.accepted
-        ) for person in persons
-    ]
+    if only_accepted is None:
+        cond = True
+    else:
+        if only_accepted:
+            cond = model_person.id_person_status == 2
+        else:
+            cond = (model_person.id_person_status == 1 or model_person.id_person_status == 3)
 
+    p_list = db.query(model_person,
+                      model_person.id,
+                      model_person.surname,
+                      model_person.name,
+                      model_person.is_deleted,
+                      model_person.id_person_status,
+                      model_user.username)\
+        .join(model_user, model_user.id_person == model_person.id)\
+        .where(model_person.is_deleted is None or model_person.is_deleted == False) \
+        .where(cond) \
+        .all()
+
+    persons_to_return = []
+
+    for p in p_list:
+        persons_to_return.append(PersonsReduced(id=p.id,
+                                                username=p.username,
+                                                name=p.name,
+                                                surname=p.surname,
+                                                accepted=(True if p.id_person_status == 2 else False)))
+
+
+    return persons_to_return
+
+
+def list_of_persons_accepted():
+    return list_of_persons(True)
 
 def list_of_persons_to_accept():
     """
     Return list of persons, only name and surname of persons that
     need to be accepted.
     """
+    return list_of_persons(False)
 
-    persons: List[Persons] = db.query(Persons).where(
-        Persons.is_deleted == False and Persons.accepted == False).all()
-
-    return [
-        PersonsReduced(
-            username=person.username,
-            name=person.name,
-            accepted=person.accepted
-        ) for person in persons
-    ]
-
+def list_of_persons_in_general():
+    """
+    Return list of persons, without considering status.
+    """
+    return list_of_persons(None)
 
 def accept_a_person(person_username: PersonUsername):
     """Accept a new person in the system
