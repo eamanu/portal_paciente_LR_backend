@@ -4,22 +4,21 @@ from app.schemas.persons import PersonsReduced, Person, PersonUsername
 from typing import List
 from app.schemas.returned_object import ReturnMessage
 
-
 db: Session = SessionLocal()
 
 
 # TODO: dev purpose. remove this
-class Persons:
+class Persons():
     username: str
     name: str
     accepted: bool
-    deleted: bool
+    is_deleted: bool
 
-    def __init__(self, username, name, accepted, deleted):
+    def __init__(self, username, name, accepted, is_deleted):
         self.username = username
         self.name = name
         self.accepted = accepted
-        self.deleted = deleted
+        self.is_deleted = is_deleted
 
 
 def list_of_persons():
@@ -27,7 +26,7 @@ def list_of_persons():
     Return list of persons, only name surname and if is accepted or
     not in the system.
     """
-    persons: List[Persons] = db.query(Persons).where(Persons.deleted == False).all()
+    persons: List[Persons] = db.query(Persons).where(Persons.is_deleted == False).all()
 
     return [
         PersonsReduced(
@@ -45,7 +44,7 @@ def list_of_persons_to_accept():
     """
 
     persons: List[Persons] = db.query(Persons).where(
-        Persons.deleted==False and Persons.accepted==False).all()
+        Persons.is_deleted == False and Persons.accepted == False).all()
 
     return [
         PersonsReduced(
@@ -93,7 +92,7 @@ def remove_a_person(person_username: PersonUsername):
     :return: 204 if was removed, 202 otherwise.
     """
     try:
-        db.query(Persons).filter(Persons.username==person_username.username).update({"deleted": True})
+        db.query(Persons).filter(Persons.username==person_username.username).update({"is_deleted": True})
         db.commit()
     except Exception:
         return {"message": "Person cannot be updated", "code": 202}

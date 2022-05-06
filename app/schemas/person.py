@@ -36,8 +36,7 @@ class Person(BaseModel):
     identification_front_image_file_type: Optional[str]
     identification_back_image_file_type: Optional[str]
     id_person_status: Optional[int]
-    identification_front_image_file_type: Optional[str]
-    identification_back_image_file_type: Optional[str]
+    family_group: Optional[list]
 
     @validator("birthdate", pre=True)
     def parse_birthdate(cls, value):
@@ -110,6 +109,7 @@ class CreatePersonResponse(BaseModel):
 
 
 class Person2(BaseModel):
+    id: Optional[int]
     surname: Optional[str]
     name: Optional[str]
     identification_number: Optional[str]
@@ -138,6 +138,7 @@ class Person2(BaseModel):
 
 
 class PersonFamily(BaseModel):
+    id: Optional[int]
     surname: Optional[str]
     name: Optional[str]
     identification_number: Optional[str]
