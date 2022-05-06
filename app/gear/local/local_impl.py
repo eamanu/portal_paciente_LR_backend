@@ -159,8 +159,8 @@ class LocalImpl:
             self.db.commit()
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            return ResponseNOK(message="User cannot be deleted.", code=417)
-        return ResponseOK(message="User deleted successfully.", code=201)
+            return ResponseNOK(message="User cannot be is_deleted.", code=417)
+        return ResponseOK(message="User is_deleted successfully.", code=201)
 
     def is_token_black_listed(self, token: str) -> bool:
         try:
@@ -288,7 +288,7 @@ class LocalImpl:
         except Exception as e:
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message=f"Error: {str(e)}", code=417)
-        return ResponseOK(message="Message deleted successfully.", code=200)
+        return ResponseOK(message="Message is_deleted successfully.", code=200)
 
     def send_message(
         self, message_id: int, category_id: int, is_for_all_categories: bool
@@ -520,8 +520,8 @@ class LocalImpl:
             self.db.commit()
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            return ResponseNOK(message="Person cannot be deleted.", code=417)
-        return ResponseOK(message="Person deleted successfully.", code=201)
+            return ResponseNOK(message="Person cannot be is_deleted.", code=417)
+        return ResponseOK(message="Person is_deleted successfully.", code=201)
 
     def get_person_by_id(self, person_id: int):
         return self.get_person(person_id, None, True)
@@ -536,6 +536,7 @@ class LocalImpl:
         is_by_id: bool,
     ):
         try:
+
             if is_by_id:
                 existing_person = (
                     self.db.query(model_person)
@@ -551,6 +552,7 @@ class LocalImpl:
                     )
                     .first()
                 )
+
             identification_number = existing_person.identification_number
 
             family_group = (
@@ -560,6 +562,7 @@ class LocalImpl:
                 )
                 .all()
             )
+
             filter_family = [
                 person
                 for person in family_group
@@ -575,7 +578,55 @@ class LocalImpl:
                 message=f"Person cannot be retrieved. Error: {str(e)}", code=417
             )
 
-        return existing_person
+        s_person = self.get_schema_person_from_model_person(existing_person)
+
+        if existing_person.family_group != "[]":
+            s_family_group = []
+            for eperson in existing_person.family_group:
+                s_family_group.append(self.get_schema_person_from_model_person(eperson))
+            s_person.family_group = s_family_group
+
+        return s_person
+
+
+    def get_schema_person_from_model_person(self, m_person: model_person):
+
+        s_person = schema_person()
+        s_person.id = m_person.id
+        s_person.name = m_person.name
+        s_person.surname = m_person.surname
+        s_person.birthdate = self.convert_date_to_str(m_person.birthdate)
+        # s_person.identification_front_image = m_person.identification_front_image
+        s_person.identification_front_image_file_type = m_person.identification_front_image_file_type
+        # s_person.identification_back_image = m_person.identification_back_image
+        s_person.identification_back_image_file_type = m_person.identification_back_image_file_type
+        s_person.id_person_status = m_person.id_person_status
+        s_person.id_admin_status = m_person.id_admin_status
+        s_person.id_gender = m_person.id_gender
+        s_person.id_patient = m_person.id_patient
+        s_person.id_usual_institution = m_person.id_usual_institution
+        s_person.locality = m_person.locality
+        s_person.id_locality = m_person.id_locality
+        s_person.department = m_person.department
+        s_person.id_department = m_person.id_department
+        s_person.phone_number = m_person.phone_number
+        s_person.identification_number = m_person.identification_number
+        s_person.id_identification_type = m_person.id_identification_type
+        s_person.identification_number_master = m_person.identification_number_master
+        s_person.id_identification_type_master = m_person.id_identification_type_master
+        s_person.is_diabetic = m_person.is_diabetic
+        s_person.is_hypertensive = m_person.is_hypertensive
+        s_person.is_chronic_kidney_disease = m_person.is_chronic_kidney_disease
+        s_person.is_chronic_respiratory_disease = m_person.is_chronic_respiratory_disease
+        s_person.address_street = m_person.address_street
+        s_person.address_number = m_person.address_number
+        s_person.email = m_person.email
+        s_person.is_deleted = m_person.is_deleted
+
+        return s_person
+
+    def convert_date_to_str(self, d: datetime):
+        return str(d.day) + "/" + str(d.month) + "/" + str(d.year)
 
     def set_admin_status_to_person(self, person_id: int, admin_status_id: int):
         try:

@@ -20,7 +20,7 @@ def login_for_access_token(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            detail="Incorrect username or password.",
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -39,7 +39,7 @@ def login_person(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            detail="Incorrect username or password...",
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -53,11 +53,18 @@ def login_person(
     # 4. Check si fue aprobado por el admin, sino mostrar un mensaje o marcarlos con un bool
     user = get_user(username)
     family = LocalImpl().get_person_by_id(user.id_person)
-    family.family_group = [
-        member.__dict__ for member in family.family_group
-    ]  # to pydantic
+    # TODO: ver porqué no está pudiendo retornar la fecha de nacimiento...
+    family.birthdate = None
+    #family.family_group = [
+    #    member for member in family.family_group
+    #]  # to pydantic
+
+    # TODO: ver porqué no está pudiendo retornar la fecha de nacimiento...
+    for member in family.family_group:
+        member.birthdate = None
+
     return PersonLogged(
         id_person=user.id_person,
         access_token=access_token,
         token_type="bearer",
-        data=family.__dict__)
+        data=family)

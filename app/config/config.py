@@ -27,6 +27,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 WHITE_LIST_PATH = (
     LR_BASE_API + "/login",
     LR_BASE_API + "/logout",
+    LR_BASE_API + "/static",
     "/docs",
     "/openapi.json",
     "/favicon.ico",
