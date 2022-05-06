@@ -204,7 +204,10 @@ async def delete_person(person_id: int):
 
 
 @router_local.get(
-    "/getpersonbyid", response_model=schema_person, tags=["User and person"]
+    "/getpersonbyid",
+    response_model=schema_person,
+    responses={417: {"model": ResponseNOK}},
+    tags=["User and person"]
 )
 async def get_person_by_id(person_id: int):
     return LocalImpl().get_person_by_id(person_id)
@@ -213,6 +216,7 @@ async def get_person_by_id(person_id: int):
 @router_local.get(
     "/getpersonbyidentificationnumber",
     response_model=schema_person,
+responses={417: {"model": ResponseNOK}},
     tags=["User and person"],
 )
 async def get_person_by_identification_number(person_identification_number: str):
