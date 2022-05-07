@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 from app.schemas.persons import PersonsReduced, Person, PersonUsername
 from app.models.person import Person as model_person
 from app.models.user import User as model_user
-from typing import List
 from app.schemas.returned_object import ReturnMessage
+from app.schemas.person_status_enum import PersonStatusEnum
 
 db: Session = SessionLocal()
 
@@ -33,9 +33,10 @@ def list_of_persons(only_accepted: bool):
         cond = True
     else:
         if only_accepted:
-            cond = model_person.id_person_status == 2
+            cond = model_person.id_person_status == PersonStatusEnum.validated.value
         else:
-            cond = (model_person.id_person_status == 1 or model_person.id_person_status == 3)
+            cond = (model_person.id_person_status == PersonStatusEnum.validation_pending.value
+                    or model_person.id_person_status == PersonStatusEnum.validation_rejected.value)
 
     p_list = db.query(model_person,
                       model_person.id,
@@ -79,57 +80,52 @@ def list_of_persons_in_general():
     return list_of_persons(None)
 
 def accept_a_person(person_username: PersonUsername):
-    """Accept a new person in the system
-
-    :param person_username: username of the system
-    :return: 204 if was procesed or 202 if failed
-    """
-    try:
-        db.query(Persons).filter(Persons.username==person_username.username).update({"accepted": True})
-    except Exception:
-        return {"message": "Person cannot be updated", "code": 202}
-    return {"message": "Person accepted successfully", "code": 204}
+    return change_person_status(person_username, PersonStatusEnum.validated.value)
 
 
 def not_accept_a_person(person_username: PersonUsername):
-    """Not Accept a new person in the system
+    return change_person_status(person_username, PersonStatusEnum.validation_rejected.value)
 
-    :param person_username: username of the system
-    :return: 204 if was procesed or 202 if failed
-    """
+
+def change_person_status(person_username: PersonUsername, person_status_id: int):
     try:
-        db.query(Persons).filter(Persons.username==person_username.username).update({"accepted": False})
-        db.commit()
+        existing_user = db.query(model_user).where(model_user.username == person_username.username).first()
+
+        if existing_user is not None:
+            existing_person = db.query(model_person).where(model_person.id == existing_user.id_person).first()
+
+            if existing_person is not None:
+                existing_person.id_person_status = person_status_id
+                db.commit()
+            else:
+                return ReturnMessage(message="Nonexistent person.", code=417)
+        else:
+            return ReturnMessage(message="Nonexistent user.", code=417)
+
     except Exception:
-        return {"message": "Person cannot be updated", "code": 202}
-    return {"message": "Person not accepted successfully", "code": 204}
+        return ReturnMessage(message="Person cannot be updated.", code=417)
+
+    return ReturnMessage(message="Person updated successfully.", code=201)
+
 
 
 def remove_a_person(person_username: PersonUsername):
-    """Remove a user from the system.
-
-    *Note*: this method don't remove a person from database, it
-    will mark as removed and that person will not be shown.
-
-    :param person_username: user to remove
-    :return: 204 if was removed, 202 otherwise.
-    """
     try:
-        db.query(Persons).filter(Persons.username==person_username.username).update({"is_deleted": True})
-        db.commit()
+        existing_user = db.query(model_user).where(model_user.username == person_username.username).first()
+
+        if existing_user is not None:
+            existing_person = db.query(model_person).where(model_person.id == existing_user.id_person).first()
+
+            if existing_person is not None:
+                existing_person.is_deleted = True
+                db.commit()
+            else:
+                return ReturnMessage(message="Nonexistent person.", code=417)
+        else:
+            return ReturnMessage(message="Nonexistent user.", code=417)
+
     except Exception:
-        return {"message": "Person cannot be updated", "code": 202}
-    return {"message": "Person not accepted successfully", "code": 204}
+        return ReturnMessage(message="Person cannot be updated.", code=417)
 
+    return ReturnMessage(message="Person updated successfully.", code=201)
 
-def create_a_new_person(new_person: Person):
-    """Create a new person from admin
-
-    :param new_person: Pydantic object
-    :return:
-    """
-    person = Persons(**new_person.dict())
-    db.add(person)
-    db.commit()
-
-    return ReturnMessage(message="New person created successfully", code=204)
