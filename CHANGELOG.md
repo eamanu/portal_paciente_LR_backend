@@ -1,9 +1,13 @@
 # CHANGELOG
 
-# 1.13.2
+## 1.4.0
+* Agrego "/get-genders" endpoint
+* Muchos fixes no registrados ;).
+
+## 1.3.2
 * Bug fixes.
 
-## 1.31.1
+## 1.3.1
 * Fix dependencies.
 
 ## 1.3.0

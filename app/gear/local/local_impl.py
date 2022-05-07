@@ -31,6 +31,7 @@ from app.models.user import User as model_user
 from app.models.person_status import PersonStatus as model_person_status
 from app.models.role import Role as model_role
 from app.models.category import Category as model_category
+from app.models.genders import Gender as model_gender
 from app.schemas.category_enum import CategoryEnum
 from app.schemas.message import Message, ReadMessage
 from app.schemas.person import (
@@ -757,7 +758,20 @@ class LocalImpl:
     def get_categories(self):
         try:
             result = []
-            collection = self.db.query(model_category).all()
+            categories = self.db.query(model_category).all()
+
+            for u in categories:
+                result.append({"id": u.id, "name": u.name})
+
+            return result
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
+            return ResponseNOK(message=f"Error: {str(e)}", code=417)
+
+    def get_genders(self):
+        try:
+            result = []
+            collection = self.db.query(model_gender).all()
 
             for u in collection:
                 result.append({"id": u.id, "name": u.name})
@@ -851,8 +865,6 @@ class LocalImpl:
                 file_to_save.close()
             else:
                 return ResponseNOK(message="Nonexistent image.", code=417)
-
-
 
         except Exception as e:
             self.log.log_error_message(e, self.module)

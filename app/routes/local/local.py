@@ -16,6 +16,7 @@ from app.main import get_db
 from app.routes import auth
 from app.routes.common import router_local
 from app.schemas.category import Category
+from app.schemas.gender import Gender
 from app.schemas.message import Message
 from app.schemas.message import ReadMessage
 from app.schemas.person import (
@@ -280,6 +281,16 @@ async def get_roles():
 )
 async def get_categories():
     return LocalImpl().get_categories()
+
+
+@router_local.get(
+    "/get-genders",
+    response_model=List[Gender],
+    responses={417: {"model": ResponseNOK}},
+    tags=["User and person"],
+)
+async def get_genders():
+    return LocalImpl().get_genders()
 
 
 @router_local.post(
