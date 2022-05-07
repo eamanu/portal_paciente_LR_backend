@@ -559,25 +559,6 @@ class LocalImpl:
             if existing_person is None:
                 return ResponseNOK(message="Nonexistent Person.", code=417)
 
-            identification_number = existing_person.identification_number
-
-            family_group = (
-                self.db.query(model_person)
-                .where(
-                    model_person.identification_number_master == identification_number
-                )
-                .all()
-            )
-
-            filter_family = [
-                person
-                for person in family_group
-                if person.identification_number != identification_number
-            ]
-
-            if family_group != "[]":
-                existing_person.family_group = filter_family
-
         except Exception as e:
             self.log.log_error_message(e, self.module)
             return ResponseNOK(
@@ -586,14 +567,33 @@ class LocalImpl:
 
         s_person = self.get_schema_person_from_model_person(existing_person)
 
-        if existing_person.family_group != "[]":
-            s_family_group = []
-            for eperson in existing_person.family_group:
-                s_family_group.append(self.get_schema_person_from_model_person(eperson))
-            s_person.family_group = s_family_group
+        s_person.family_group = self.get_family_group_by_identification_number_master(s_person.identification_number)
 
         return s_person
 
+    def get_family_group_by_identification_number_master(self, identification_number_master: str):
+
+        s_family_group = []
+
+        family_group = (
+            self.db.query(model_person)
+                .where(
+                model_person.identification_number_master == identification_number_master
+            )
+                .all()
+        )
+
+        filter_family = [
+            person
+            for person in family_group
+            if person.identification_number != identification_number_master
+        ]
+
+        if filter_family != "[]":
+            for eperson in filter_family:
+                s_family_group.append(self.get_schema_person_from_model_person(eperson))
+
+        return s_family_group
 
     def get_schema_person_from_model_person(self, m_person: model_person):
 

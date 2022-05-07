@@ -1,5 +1,4 @@
 from app.gear.local.admin import (
-    create_a_new_person,
     remove_a_person,
     not_accept_a_person,
     accept_a_person,
@@ -11,11 +10,6 @@ from app.routes.common import router_admin
 from app.schemas.persons import Person, PersonUsername, PersonsReduced
 from app.schemas.returned_object import ReturnMessage
 from typing import List
-
-@router_admin.put("/person", name="Create a Person",
-                  response_model=ReturnMessage, description="Create a new Person")
-async def create_person(person: Person):
-    return create_a_new_person(person)
 
 
 @router_admin.delete("/person", name="Remove a Person",

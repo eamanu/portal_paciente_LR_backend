@@ -222,6 +222,15 @@ responses={417: {"model": ResponseNOK}},
 async def get_person_by_identification_number(person_identification_number: str):
     return LocalImpl().get_person_by_identification_number(person_identification_number)
 
+@router_local.get(
+    "/getfamilygroupbyidentificationnumbermaster",
+    response_model=List[schema_person],
+responses={417: {"model": ResponseNOK}},
+    tags=["User and person"],
+)
+async def get_family_group_by_identification_number_master(person_identification_number_master: str):
+    return LocalImpl().get_family_group_by_identification_number_master(person_identification_number_master)
+
 
 @router_local.put(
     "/setadminstatustoperson",
