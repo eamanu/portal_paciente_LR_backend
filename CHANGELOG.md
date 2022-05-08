@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.5.0
+* En el login de personas ahora se chequea:
+  * Que el paciente validó el mail. Caso contrario se rechaza el login.
+  * Que el paciente fue validado por el administrador del sistema. Caso contrario se rechaza el login.
+* Se retorna la fecha de nacimiento en el login.
+
 ## 1.4.0
 * Agrego "/get-genders" endpoint
 * Muchos fixes no registrados ;).

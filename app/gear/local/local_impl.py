@@ -566,7 +566,8 @@ class LocalImpl:
                 message=f"Person cannot be retrieved. Error: {str(e)}", code=417
             )
 
-        s_person = self.get_schema_person_from_model_person(existing_person)
+        # s_person = self.get_schema_person_from_model_person(existing_person)
+        s_person = schema_person.from_orm(existing_person)
 
         s_person.family_group = self.get_family_group_by_identification_number_master(s_person.identification_number)
 
@@ -592,17 +593,19 @@ class LocalImpl:
 
         if filter_family != "[]":
             for eperson in filter_family:
-                s_family_group.append(self.get_schema_person_from_model_person(eperson))
+                s_family_group.append(schema_person.from_orm(eperson))
 
         return s_family_group
 
+    # TODO: Tal vez se puede borrar este método porque no se usa.
+    # pero dejarlo, por las dudas rompa los cambios que hice en el
+    # schema de Personas.
     def get_schema_person_from_model_person(self, m_person: model_person):
-
         s_person = schema_person()
         s_person.id = m_person.id
         s_person.name = m_person.name
         s_person.surname = m_person.surname
-        s_person.birthdate = self.convert_date_to_str(m_person.birthdate)
+        s_person.birthdate = m_person.birthdate
         # s_person.identification_front_image = m_person.identification_front_image
         s_person.identification_front_image_file_type = m_person.identification_front_image_file_type
         # s_person.identification_back_image = m_person.identification_back_image
@@ -631,9 +634,6 @@ class LocalImpl:
         s_person.is_deleted = m_person.is_deleted
 
         return s_person
-
-    def convert_date_to_str(self, d: datetime):
-        return str(d.day) + "/" + str(d.month) + "/" + str(d.year)
 
     def set_admin_status_to_person(self, person_id: int, admin_status_id: int):
         try:

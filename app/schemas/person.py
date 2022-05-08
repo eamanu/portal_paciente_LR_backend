@@ -40,7 +40,14 @@ class Person(BaseModel):
 
     @validator("birthdate", pre=True)
     def parse_birthdate(cls, value):
-        return datetime.strptime(value, "%d/%m/%Y")
+        # XXX: Tenemos un problema entre schemas y modelos que no son compatibles
+        # por lo que esto es necesario. No eliminar.
+        if isinstance(value, str):
+            return datetime.strptime(value, "%d/%m/%Y")
+        return datetime.combine(value, datetime.min.time())
+
+    class Config:
+        orm_mode = True
 
 
 class CreatePerson(BaseModel):
