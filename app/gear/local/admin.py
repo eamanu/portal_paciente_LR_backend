@@ -4,7 +4,7 @@ from app.schemas.persons import PersonsReduced, Person, PersonUsername
 from app.models.person import Person as model_person
 from app.models.user import User as model_user
 from app.schemas.returned_object import ReturnMessage
-from app.schemas.person_status_enum import PersonStatusEnum
+from app.schemas.admin_status_enum import AdminStatusEnum
 
 db: Session = SessionLocal()
 
@@ -33,17 +33,17 @@ def list_of_persons(only_accepted: bool):
         cond = True
     else:
         if only_accepted:
-            cond = model_person.id_person_status == PersonStatusEnum.validated.value
+            cond = model_person.id_admin_status == AdminStatusEnum.validated.value
         else:
-            cond = (model_person.id_person_status == PersonStatusEnum.validation_pending.value
-                    or model_person.id_person_status == PersonStatusEnum.validation_rejected.value)
+            cond = (model_person.id_admin_status == AdminStatusEnum.validation_pending.value
+                    or model_person.id_admin_status == AdminStatusEnum.validation_rejected.value)
 
     p_list = db.query(model_person,
                       model_person.id,
                       model_person.surname,
                       model_person.name,
                       model_person.is_deleted,
-                      model_person.id_person_status,
+                      model_person.id_admin_status,
                       model_user.username)\
         .join(model_user, model_user.id_person == model_person.id)\
         .where(model_person.is_deleted is None or model_person.is_deleted == False) \
@@ -57,7 +57,7 @@ def list_of_persons(only_accepted: bool):
                                                 username=p.username,
                                                 name=p.name,
                                                 surname=p.surname,
-                                                accepted=(True if p.id_person_status == 2 else False)))
+                                                accepted=(True if p.id_admin_status == AdminStatusEnum.validated.value else False)))
 
 
     return persons_to_return
@@ -80,14 +80,14 @@ def list_of_persons_in_general():
     return list_of_persons(None)
 
 def accept_a_person(person_username: PersonUsername):
-    return change_person_status(person_username, PersonStatusEnum.validated.value)
+    return change_person_status_by_admin(person_username, AdminStatusEnum.validated.value)
 
 
 def not_accept_a_person(person_username: PersonUsername):
-    return change_person_status(person_username, PersonStatusEnum.validation_rejected.value)
+    return change_person_status_by_admin(person_username, AdminStatusEnum.validation_rejected.value)
 
 
-def change_person_status(person_username: PersonUsername, person_status_id: int):
+def change_person_status_by_admin(person_username: PersonUsername, admin_status_id: int):
     try:
         existing_user = db.query(model_user).where(model_user.username == person_username.username).first()
 
@@ -95,7 +95,7 @@ def change_person_status(person_username: PersonUsername, person_status_id: int)
             existing_person = db.query(model_person).where(model_person.id == existing_user.id_person).first()
 
             if existing_person is not None:
-                existing_person.id_person_status = person_status_id
+                existing_person.id_admin_status = admin_status_id
                 db.commit()
             else:
                 return ReturnMessage(message="Nonexistent person.", code=417)

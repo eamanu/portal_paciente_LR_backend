@@ -29,6 +29,7 @@ from app.models.person import Person as model_person
 from app.models.person_message import PersonMessage as model_person_message
 from app.models.user import User as model_user
 from app.models.person_status import PersonStatus as model_person_status
+from app.models.admin_status import AdminStatus as model_admin_status
 from app.models.role import Role as model_role
 from app.models.category import Category as model_category
 from app.models.genders import Gender as model_gender
@@ -727,6 +728,21 @@ class LocalImpl:
             return ResponseNOK(
                 message=f"Person and user cannot be created. Error: {str(e)}", code=417
             )
+
+    def get_admin_status(self):
+        try:
+            result = []
+            collection = self.db.query(model_admin_status).all()
+
+            for u in collection:
+                result.append({"id": u.id, "name": u.name})
+
+            return result
+
+        except Exception as e:
+            self.log.log_error_message(e, self.module)
+            return ResponseNOK(message=f"Error: {str(e)}", code=417)
+
 
     def get_person_status(self):
         try:
