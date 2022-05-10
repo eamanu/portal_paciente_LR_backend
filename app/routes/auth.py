@@ -1,5 +1,4 @@
 from datetime import timedelta
-from enum import Enum
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -12,17 +11,8 @@ from app.config.config import ACCESS_TOKEN_EXPIRE_MINUTES
 from app.gear.local.local_impl import LocalImpl
 from app.main import get_db
 from app.schemas.person import PersonLogged
-
-
-class ID_PERSON_STATUS(Enum):
-    NOT_VALIDATED_YET = 1
-    VALIDATED = 2
-
-
-class ID_ADMIN_STATUS(Enum):
-    NOT_VALIDATED_YET = 1
-    VALIDATED = 2
-    REFUSED = 3
+from app.schemas.person_status_enum import PersonStatusEnum
+from app.schemas.admin_status_enum import AdminStatusEnum
 
 
 def login_for_access_token(
@@ -65,14 +55,14 @@ def login_person(
     family_boss = LocalImpl().get_person_by_id(user.id_person)
 
     # 2. Check si esa Persona ya valido email
-    if family_boss.id_person_status != ID_PERSON_STATUS.VALIDATED.value:
+    if family_boss.id_person_status != PersonStatusEnum.email_validated.value:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Mail not validated."
+            detail="Mail not email_validated."
         )
 
     # 3. Check si fue aprobado por el admin
-    if family_boss.id_admin_status != ID_ADMIN_STATUS.VALIDATED.value:
+    if family_boss.id_admin_status != AdminStatusEnum.validated.value:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Wait for approval."

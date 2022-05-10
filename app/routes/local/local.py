@@ -25,6 +25,7 @@ from app.schemas.person import (
 )
 from app.schemas.person import PersonLogged
 from app.schemas.person_status import PersonStatus
+from app.schemas.admin_status import AdminStatus
 from app.schemas.person_user import PersonUser as schema_person_user
 from app.schemas.responses import HTTPError
 from app.schemas.responses import ResponseOK, ResponseNOK
@@ -251,6 +252,16 @@ async def set_admin_status_to_person(person_id: int, admin_status_id: int):
 )
 async def create_person_and_user(person_user: schema_person_user):
     return LocalImpl().create_person_and_user(person_user)
+
+
+@router_local.get(
+    "/getadminstatus",
+    response_model=List[AdminStatus],
+    responses={417: {"model": ResponseNOK}},
+    tags=["Admin"],
+)
+async def get_admin_status():
+    return LocalImpl().get_admin_status()
 
 
 @router_local.get(

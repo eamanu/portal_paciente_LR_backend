@@ -1,6 +1,6 @@
 import enum
 
 class PersonStatusEnum(enum.Enum):
-    validation_pending = 1
-    validated = 2
-    validation_rejected = 3
+    email_validation_pending = 1
+    email_validated = 2
+    email_validation_rejected = 3

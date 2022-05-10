@@ -81,6 +81,28 @@ INSERT INTO `person_status` (`id`, `name`) VALUES (3,'RECHAZADO');
 /*!40000 ALTER TABLE `person_status` ENABLE KEYS */;
 UNLOCK TABLES;
 
+
+DROP TABLE IF EXISTS `admin_status`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `admin_status` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) CHARACTER SET latin1 COLLATE latin1_spanish_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `person_status`
+--
+
+LOCK TABLES `admin_status` WRITE;
+/*!40000 ALTER TABLE `admin_status` DISABLE KEYS */;
+INSERT INTO `admin_status` (`id`, `name`) VALUES (1,'EMAIL PENDIENTE DE VALIDACIÓN');
+INSERT INTO `admin_status` (`id`, `name`) VALUES (2,'EMAIL VALIDADO');
+INSERT INTO `admin_status` (`id`, `name`) VALUES (3,'EMAIL RECHAZADO');
+/*!40000 ALTER TABLE `admin_status` ENABLE KEYS */;
+UNLOCK TABLES;
 --
 -- Table structure for table `expiration_black_list`
 --

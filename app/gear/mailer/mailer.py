@@ -61,7 +61,7 @@ async def send_validation_mail(person_id: str) -> bool:
 
     user = db.query(User).where(User.id_person == existing_person.id).first()
     if bool(user.is_mail_validate):
-        log.log_error_message("Mail Validation - User already validated", module)
+        log.log_error_message("Mail Validation - User already email_validated", module)
         return False
 
     validation_url = generate_validation_url(user)
@@ -121,13 +121,13 @@ async def validate_email(token: str) -> Union[ResponseNOK, ResponseOK]:
             raise ValidationError(f"User doesn't exist")
         # Validate user and save
         if bool(user.is_mail_validate):
-            raise ValidationError(f"User already validated")
+            raise ValidationError(f"User already email_validated")
         user.is_mail_validate = 1
         db.commit()
     except (KeyError, ValidationError) as err:
         log.log_error_message(f"Error: {str(err)}", module)
-        return ResponseNOK(message="Something wrong, mail cannot be validated.", code=400)
+        return ResponseNOK(message="Something wrong, mail cannot be email_validated.", code=400)
     except JWTError as err:
         log.log_error_message(f"Something wrong with the token decode: {str(err)}")
-        return ResponseNOK(message="Something wrong, mail cannot be validated.", code=400)
-    return ResponseOK(message="User validated successfully", code=200)
+        return ResponseNOK(message="Something wrong, mail cannot be email_validated.", code=400)
+    return ResponseOK(message="User email_validated successfully", code=200)
