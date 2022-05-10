@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.5.1
+* Posibilidad de configurar DEBUG_MAIL_VALIDATION para usar un mail de debug para tests.
+
 ## 1.5.0
 * En el login de personas ahora se chequea:
   * Que el paciente validó el mail. Caso contrario se rechaza el login.
