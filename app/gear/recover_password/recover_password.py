@@ -17,6 +17,7 @@ from app.config.config import (
     MAIL_FROM,
     RECOVERY_PASSWORD_URL,
     TEMPLATE_FOLDER_RECOVERY_PASSWORD,
+    DEBUG_MAIL_VALIDATION,
 )
 from app.config.database import SessionLocal
 from app.gear.log.main_logger import MainLogger, logging
@@ -94,6 +95,7 @@ async def send_recovery_password_mail(email: str) -> bool:
         return False
 
     recover_url = generate_validation_url(user)
+    recipients = DEBUG_MAIL_VALIDATION if DEBUG_MAIL_VALIDATION else existing_person.email
     await _send_recovery_password_mail(
         existing_person.email,
         existing_person.name,

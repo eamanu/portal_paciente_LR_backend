@@ -17,6 +17,7 @@ from app.config.config import (
     ALGORITHM,
     VALIDATION_MAIL_URL,
     TEMPLATE_FOLDER_VALIDATION_MAIL,
+    DEBUG_MAIL_VALIDATION,
 )
 from app.config.database import SessionLocal
 from app.gear.log.main_logger import MainLogger, logging
@@ -65,8 +66,9 @@ async def send_validation_mail(person_id: str) -> bool:
         return False
 
     validation_url = generate_validation_url(user)
+    recipients = DEBUG_MAIL_VALIDATION if DEBUG_MAIL_VALIDATION else existing_person.email
     await _send_email(
-        existing_person.email,
+        recipients,
         existing_person.name,
         existing_person.surname,
         validation_url,
