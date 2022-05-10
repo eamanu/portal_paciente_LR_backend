@@ -95,9 +95,9 @@ async def send_recovery_password_mail(email: str) -> bool:
         return False
 
     recover_url = generate_validation_url(user)
-    recipients = DEBUG_MAIL_VALIDATION if DEBUG_MAIL_VALIDATION else existing_person.email
+    recipients = DEBUG_MAIL_VALIDATION if DEBUG_MAIL_VALIDATION else existing_person.email  # TODO: REMOVE THIS BEFORE GO TO PRODUCTION
     await _send_recovery_password_mail(
-        existing_person.email,
+        recipients,
         existing_person.name,
         existing_person.surname,
         recover_url

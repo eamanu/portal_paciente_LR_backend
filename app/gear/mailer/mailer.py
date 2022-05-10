@@ -66,7 +66,7 @@ async def send_validation_mail(person_id: str) -> bool:
         return False
 
     validation_url = generate_validation_url(user)
-    recipients = DEBUG_MAIL_VALIDATION if DEBUG_MAIL_VALIDATION else existing_person.email
+    recipients = DEBUG_MAIL_VALIDATION if DEBUG_MAIL_VALIDATION else existing_person.email  # TODO: REMOVE THIS BEFORE GO TO PRODUCTION
     await _send_email(
         recipients,
         existing_person.name,
