@@ -20,4 +20,4 @@ class HSIImpl2:
                 return False
         with self.engine.connect() as conn:
             exec_result = conn.execute(sql)
-        return exec_result
+        return [row for row in exec_result]

@@ -1,7 +1,11 @@
-from app.gear.hsi.hsi_impl import HSI_Impl
 from typing import Dict
+
+from fastapi.encoders import jsonable_encoder
+
+from app.gear.hsi.hsi_impl import HSI_Impl
+from app.gear.hsi.hsi_impl_2 import HSIImpl2
 from app.routes.common import router_hsi
-from app.schemas.token import Token
+
 
 # region Parametric data
 
@@ -163,5 +167,16 @@ async def complete_data(
     else:
         return {}
 
+
+# endregion
+
+
+# TODO: REMOVE THIS TEST
+# region test
+
+@router_hsi.get("/tests/bed", tags=["TESTS"])
+def complete_data():
+    hsi_impl = HSIImpl2()
+    return hsi_impl.execute("SELECT * FROM bed")
 
 # endregion

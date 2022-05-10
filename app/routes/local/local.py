@@ -15,6 +15,7 @@ from app.gear.recover_password.recover_password import send_recovery_password_ma
 from app.main import get_db
 from app.routes import auth
 from app.routes.common import router_local
+from app.schemas.admin_status import AdminStatus
 from app.schemas.category import Category
 from app.schemas.gender import Gender
 from app.schemas.message import Message
@@ -25,18 +26,17 @@ from app.schemas.person import (
 )
 from app.schemas.person import PersonLogged
 from app.schemas.person_status import PersonStatus
-from app.schemas.admin_status import AdminStatus
 from app.schemas.person_user import PersonUser as schema_person_user
 from app.schemas.responses import HTTPError
 from app.schemas.responses import ResponseOK, ResponseNOK
 from app.schemas.role import Role
 from app.schemas.token import Token
 
-
 oauth_schema = OAuth2PasswordBearer(tokenUrl="/login")
 
 log = MainLogger()
 module = logging.getLogger(__name__)
+
 
 
 @router_local.get("/version")
