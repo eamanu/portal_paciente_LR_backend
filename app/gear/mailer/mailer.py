@@ -4,6 +4,7 @@ from typing import Union
 
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from jose import jwt
+from jose.exceptions import JWTError
 from sqlalchemy.orm import Session
 
 from app.config.config import (
@@ -15,14 +16,13 @@ from app.config.config import (
     SECRET_KEY,
     ALGORITHM,
     VALIDATION_MAIL_URL,
+    TEMPLATE_FOLDER_VALIDATION_MAIL,
 )
 from app.config.database import SessionLocal
 from app.gear.log.main_logger import MainLogger, logging
 from app.models.person import Person
 from app.models.user import User
 from app.schemas.responses import ResponseNOK, ResponseOK
-from jose.exceptions import JWTError
-
 
 conf = ConnectionConfig(
     MAIL_USERNAME=MAIL_USERNAME,
@@ -32,7 +32,7 @@ conf = ConnectionConfig(
     MAIL_SERVER=MAIL_SERVER,
     MAIL_TLS=True,
     MAIL_SSL=False,
-    TEMPLATE_FOLDER=Path("/code/app/templates/"),  # FIXME: fix this
+    TEMPLATE_FOLDER=Path(TEMPLATE_FOLDER_VALIDATION_MAIL),
 )
 
 db: Session = SessionLocal()

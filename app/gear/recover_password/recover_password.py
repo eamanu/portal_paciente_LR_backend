@@ -16,6 +16,7 @@ from app.config.config import (
     MAIL_USERNAME,
     MAIL_FROM,
     RECOVERY_PASSWORD_URL,
+    TEMPLATE_FOLDER_RECOVERY_PASSWORD,
 )
 from app.config.database import SessionLocal
 from app.gear.log.main_logger import MainLogger, logging
@@ -31,7 +32,7 @@ conf = ConnectionConfig(
     MAIL_SERVER=MAIL_SERVER,
     MAIL_TLS=True,
     MAIL_SSL=False,
-    TEMPLATE_FOLDER=Path("/code/app/templates/"),  # FIXME: fix this
+    TEMPLATE_FOLDER=Path(TEMPLATE_FOLDER_RECOVERY_PASSWORD),
 )
 
 
