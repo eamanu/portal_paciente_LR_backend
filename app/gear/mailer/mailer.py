@@ -58,13 +58,13 @@ async def send_validation_mail(person_id: str) -> bool:
         db.query(Person).where(Person.id == person_id).first()
     )  # type: Person
 
-    log.log_info_message(f"existing_person: {existing_person}")
+    log.log_info_message(f"existing_person: {existing_person}", module)
 
     existing_person2 = (
         db.query(Person).where(Person.id == int(person_id)).first()
     )  # type: Person
 
-    log.log_info_message(f"existing_person2: {existing_person2}")
+    log.log_info_message(f"existing_person2: {existing_person2}", module)
 
     if existing_person is None or existing_person2 is None:
         log.log_error_message("Mail Validation - Person, doesn't exist", module)
