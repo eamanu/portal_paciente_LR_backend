@@ -53,7 +53,7 @@ class ValidationError(Exception):
 # y que la parte de validación vaya a otro modulo.
 # La generación del token debería ir a un utils/
 async def send_validation_mail(person_id: str) -> bool:
-    log.log_info_message(f"Test - {person_id} - {type(person_id)}")
+    log.log_info_message(f"Test - {person_id} - {type(person_id)}", module)
     existing_person = (
         db.query(Person).where(Person.id == person_id).first()
     )  # type: Person
