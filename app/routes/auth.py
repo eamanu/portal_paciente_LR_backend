@@ -54,8 +54,8 @@ def login_person(
     user = get_user(username)
     family_boss = LocalImpl().get_person_by_id(user.id_person)
 
-    # 2. Check si esa Persona ya valido email
-    if family_boss.id_person_status != PersonStatusEnum.email_validated.value:
+    # 2. Check si el user ya valido email
+    if user.is_mail_validate != 1:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Mail not email_validated."

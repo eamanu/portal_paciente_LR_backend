@@ -1,5 +1,6 @@
 import enum
 
+
 class AdminStatusEnum(enum.Enum):
     validation_pending = 1
     validated = 2

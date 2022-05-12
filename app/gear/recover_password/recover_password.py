@@ -24,6 +24,7 @@ from app.gear.log.main_logger import MainLogger, logging
 from app.models.person import Person
 from app.models.user import User
 from app.schemas.responses import ResponseOK, ResponseNOK
+from app.schemas.admin_status_enum import AdminStatusEnum
 
 conf = ConnectionConfig(
     MAIL_USERNAME=MAIL_USERNAME,
@@ -72,7 +73,7 @@ async def send_recovery_password_mail(email: str) -> bool:
         log.log_info_message(f"User with email={email} doesn't exist.", module)
         return False
 
-    if existing_person.id_person_status != 2:
+    if existing_person.id_admin_status != AdminStatusEnum.validated.value:
         log.log_info_message(
             f"User with email={email} was not validated by "
             f"the ADMIN user or was denied",
