@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 from pathlib import Path
 from typing import Union
@@ -53,20 +54,17 @@ class ValidationError(Exception):
 # y que la parte de validación vaya a otro modulo.
 # La generación del token debería ir a un utils/
 async def send_validation_mail(person_id: str) -> bool:
-    log.log_info_message(f"Test - {person_id} - {type(person_id)}", module)
-    existing_person = (
-        db.query(Person).where(Person.id == person_id).first()
-    )  # type: Person
+    existing_person = None
+    for i in range(200):
+        existing_person = (
+            db.query(Person).where(Person.id == person_id).first()
+        )  # type: Person
+        if existing_person is not None:
+            break
+        log.log_info_message(f"Mail Validation - trying to get person. Attempt: {i}", module)
+        await asyncio.sleep(1)
 
-    log.log_info_message(f"existing_person: {existing_person}", module)
-
-    existing_person2 = (
-        db.query(Person).where(Person.id == int(person_id)).first()
-    )  # type: Person
-
-    log.log_info_message(f"existing_person2: {existing_person2}", module)
-
-    if existing_person is None or existing_person2 is None:
+    if existing_person is None:
         log.log_error_message("Mail Validation - Person, doesn't exist", module)
         return False
 
