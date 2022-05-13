@@ -46,8 +46,8 @@ def list_of_persons(only_accepted: bool):
                       model_person.id_admin_status,
                       model_person.id_person_status,
                       model_user.username)\
-        .join(model_user, model_user.id_person == model_person.id)\
-        .where(model_person.is_deleted is None or model_person.is_deleted is False) \
+        .join(model_user, model_user.id_person == model_person.id) \
+        .where(model_person.is_deleted == None) \
         .where(cond) \
         .all()
 
