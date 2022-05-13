@@ -161,8 +161,8 @@ class LocalImpl:
             self.db.commit()
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            return ResponseNOK(message="User cannot be is_deleted.", code=417)
-        return ResponseOK(message="User is_deleted successfully.", code=201)
+            return ResponseNOK(message="User cannot be deleted.", code=417)
+        return ResponseOK(message="User deleted successfully.", code=201)
 
     def is_token_black_listed(self, token: str) -> bool:
         try:
@@ -290,7 +290,7 @@ class LocalImpl:
         except Exception as e:
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message=f"Error: {str(e)}", code=417)
-        return ResponseOK(message="Message is_deleted successfully.", code=200)
+        return ResponseOK(message="Message deleted successfully.", code=200)
 
     def send_message(
         self, message_id: int, category_id: int, is_for_all_categories: bool
@@ -440,6 +440,8 @@ class LocalImpl:
         try:
             new_person = model_person(**person.dict())
 
+            new_person.is_deleted = None
+
             self.db.add(new_person)
             self.db.commit()
 
@@ -500,6 +502,8 @@ class LocalImpl:
             existing_person.email = updated_person.email
             existing_person.id_person_status = updated_person.id_person_status
 
+            existing_person.is_deleted = None
+
             self.db.commit()
             return ResponseOK(
                 value=str(existing_person.id),
@@ -522,8 +526,8 @@ class LocalImpl:
             self.db.commit()
         except Exception as e:
             self.log.log_error_message(e, self.module)
-            return ResponseNOK(message="Person cannot be is_deleted.", code=417)
-        return ResponseOK(message="Person is_deleted successfully.", code=201)
+            return ResponseNOK(message="Person cannot be deleted.", code=417)
+        return ResponseOK(message="Person deleted successfully.", code=201)
 
     def get_person_by_id(self, person_id: int):
         return self.get_person(person_id, None, True)
@@ -567,8 +571,8 @@ class LocalImpl:
                 message=f"Person cannot be retrieved. Error: {str(e)}", code=417
             )
 
-        # s_person = self.get_schema_person_from_model_person(existing_person)
-        s_person = schema_person.from_orm(existing_person)
+        # s_person = schema_person.from_orm(existing_person)
+        s_person = self.get_schema_person_from_model_person(existing_person)
 
         s_person.family_group = self.get_family_group_by_identification_number_master(s_person.identification_number)
 
@@ -594,13 +598,16 @@ class LocalImpl:
 
         if filter_family != "[]":
             for eperson in filter_family:
-                s_family_group.append(schema_person.from_orm(eperson))
+                # s_family_group.append(schema_person.from_orm(eperson))
+                s_family_group.append(self.get_schema_person_from_model_person(eperson))
 
         return s_family_group
 
     # TODO: Tal vez se puede borrar este método porque no se usa.
     # pero dejarlo, por las dudas rompa los cambios que hice en el
     # schema de Personas.
+    # Lo tuve que volver a usar, porque este método permite retornar
+    # sólo los campos que uno quiere. Ejemplo: las imágenes del DNI.
     def get_schema_person_from_model_person(self, m_person: model_person):
         s_person = schema_person()
         s_person.id = m_person.id
@@ -698,6 +705,8 @@ class LocalImpl:
                 person_user.email,
                 person_user.id_person_status,
             )
+
+            new_person.is_deleted = None
 
             self.db.add(new_person)
             self.db.commit()
