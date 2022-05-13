@@ -44,9 +44,10 @@ def list_of_persons(only_accepted: bool):
                       model_person.name,
                       model_person.is_deleted,
                       model_person.id_admin_status,
+                      model_person.id_person_status,
                       model_user.username)\
         .join(model_user, model_user.id_person == model_person.id)\
-        .where(model_person.is_deleted is None or model_person.is_deleted == False) \
+        .where(model_person.is_deleted is None or model_person.is_deleted is False) \
         .where(cond) \
         .all()
 
@@ -57,7 +58,8 @@ def list_of_persons(only_accepted: bool):
                                                 username=p.username,
                                                 name=p.name,
                                                 surname=p.surname,
-                                                accepted=(True if p.id_admin_status == AdminStatusEnum.validated.value else False)))
+                                                id_admin_status=p.id_admin_status,
+                                                id_person_status=p.id_person_status))
 
 
     return persons_to_return
