@@ -147,4 +147,6 @@ async def recover_password(token: str, password: str) -> Union[ResponseNOK, Resp
     except JWTError as err:
         log.log_error_message(f"Something wrong with the token decode: {str(err)}")
         return ResponseNOK(message="Something wrong, password cannot be change.", code=400)
+    except Exception as e:
+        db.rollback()
     return ResponseOK(message="User password change", code=200)

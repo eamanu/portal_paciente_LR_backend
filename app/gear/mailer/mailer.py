@@ -140,4 +140,6 @@ async def validate_email(token: str) -> Union[ResponseNOK, ResponseOK]:
     except JWTError as err:
         log.log_error_message(f"Something wrong with the token decode: {str(err)}")
         return ResponseNOK(message="Something wrong, mail cannot be email_validated.", code=400)
+    except Exception as e:
+        db.rollback()
     return ResponseOK(message="User email_validated successfully", code=200)

@@ -105,6 +105,7 @@ def change_person_status_by_admin(person_username: PersonUsername, admin_status_
             return ReturnMessage(message="Nonexistent user.", code=417)
 
     except Exception:
+        db.rollback()
         return ReturnMessage(message="Person cannot be updated.", code=417)
 
     return ReturnMessage(message="Person updated successfully.", code=201)
@@ -127,6 +128,7 @@ def remove_a_person(person_username: PersonUsername):
             return ReturnMessage(message="Nonexistent user.", code=417)
 
     except Exception:
+        db.rollback()
         return ReturnMessage(message="Person cannot be updated.", code=417)
 
     return ReturnMessage(message="Person updated successfully.", code=201)

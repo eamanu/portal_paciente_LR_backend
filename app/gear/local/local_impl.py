@@ -128,6 +128,7 @@ class LocalImpl:
             self.db.add(new_user)
             self.db.commit()
         except Exception as e:
+            self.db.rollback()
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message="User not created.", code=417)
         return ResponseOK(message="User created successfully.", code=201)
@@ -160,6 +161,7 @@ class LocalImpl:
             self.db.delete(old_user)
             self.db.commit()
         except Exception as e:
+            self.db.rollback()
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message="User cannot be deleted.", code=417)
         return ResponseOK(message="User deleted successfully.", code=201)
@@ -182,6 +184,7 @@ class LocalImpl:
             self.db.add(expiration_black_list)
             self.db.commit()
         except Exception as e:
+            self.db.rollback()
             self.log.log_error_message(e, self.module)
 
     def delete_old_tokens(self):
@@ -199,6 +202,7 @@ class LocalImpl:
 
             self.db.commit()
         except Exception as e:
+            self.db.rollback()
             self.log.log_error_message(e, self.module)
             return True
 
@@ -247,6 +251,7 @@ class LocalImpl:
             self.db.commit()
 
         except Exception as e:
+            self.db.rollback()
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message="Message not created.", code=417)
 
@@ -269,6 +274,7 @@ class LocalImpl:
             self.db.commit()
 
         except Exception as e:
+            self.db.rollback()
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message="Message not updated.", code=417)
 
@@ -288,6 +294,7 @@ class LocalImpl:
             self.db.commit()
 
         except Exception as e:
+            self.db.rollback()
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message=f"Error: {str(e)}", code=417)
         return ResponseOK(message="Message deleted successfully.", code=200)
@@ -356,6 +363,7 @@ class LocalImpl:
                 self.db.commit()
 
         except Exception as e:
+            self.db.rollback()
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message="Message relation not created.", code=417)
         return ResponseOK(message="Message relation created successfully.", code=201)
@@ -426,6 +434,7 @@ class LocalImpl:
 
             return ResponseOK(message="Message set read successfully.", code=201)
         except Exception as e:
+            self.db.rollback()
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message=f"Error: {str(e)}", code=417)
 
@@ -452,6 +461,7 @@ class LocalImpl:
             )
 
         except Exception as e:
+            self.db.rollback()
             self.log.log_error_message(e, self.module)
             return ResponseNOK(value="", message="Person not created.", code=417)
 
@@ -512,6 +522,7 @@ class LocalImpl:
             )
 
         except Exception as e:
+            self.db.rollback()
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message="Person cannot be updated.", code=417)
 
@@ -525,6 +536,7 @@ class LocalImpl:
             old_person.is_deleted = True
             self.db.commit()
         except Exception as e:
+            self.db.rollback()
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message="Person cannot be deleted.", code=417)
         return ResponseOK(message="Person deleted successfully.", code=201)
@@ -651,6 +663,7 @@ class LocalImpl:
             existing_person.id_admin_status = admin_status_id
             self.db.commit()
         except Exception as e:
+            self.db.rollback()
             self.log.log_error_message(e, self.module)
             return ResponseNOK(
                 message=f"Person cannot be updated. Error: {str(e)}", code=417
@@ -734,6 +747,7 @@ class LocalImpl:
             )
 
         except Exception as e:
+            self.db.rollback()
             return ResponseNOK(
                 message=f"Person and user cannot be created. Error: {str(e)}", code=417
             )
@@ -853,6 +867,7 @@ class LocalImpl:
             await send_validation_mail(person_id)
 
         except Exception as e:
+            self.db.rollback()
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message=f"Error: {str(e)}", code=417)
         return ResponseOK(message="Files uploaded successfully.", code=201)
