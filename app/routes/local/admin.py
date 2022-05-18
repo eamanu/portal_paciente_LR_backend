@@ -24,17 +24,17 @@ async def not_accept_person(person_username: PersonUsername):
     return not_accept_a_person(person_username)
 
 
-@router_admin.put("/accepted", name="Accept a Person",
+@router_admin.put("/id_admin_status", name="Accept a Person",
                   response_model=ReturnMessage, description="Accept a Person in the system")
 async def accept_person(person_username: PersonUsername):
     return accept_a_person(person_username)
 
 
-@router_admin.get("/persons_accepted", name="List of accepted Person", response_model=List[PersonsReduced], description="List of Persons accepted in the system")
+@router_admin.get("/persons_accepted", name="List of id_admin_status Person", response_model=List[PersonsReduced], description="List of Persons id_admin_status in the system")
 async def persons_accepted():
     return list_of_persons_accepted()
 
-@router_admin.get("/persons_to_be_accepted", name="List of accepted Person", response_model=List[PersonsReduced], description="List of Persons to be accepted in the system")
+@router_admin.get("/persons_to_be_accepted", name="List of id_admin_status Person", response_model=List[PersonsReduced], description="List of Persons to be id_admin_status in the system")
 async def persons_accepted():
     return list_of_persons_to_accept()
 

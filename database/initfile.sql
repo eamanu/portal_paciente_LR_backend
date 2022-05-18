@@ -75,9 +75,9 @@ CREATE TABLE `person_status` (
 
 LOCK TABLES `person_status` WRITE;
 /*!40000 ALTER TABLE `person_status` DISABLE KEYS */;
-INSERT INTO `person_status` (`id`, `name`) VALUES (1,'PENDIENTE DE VALIDACIÓN');
-INSERT INTO `person_status` (`id`, `name`) VALUES (2,'VALIDADO');
-INSERT INTO `person_status` (`id`, `name`) VALUES (3,'RECHAZADO');
+INSERT INTO `person_status` (`id`, `name`) VALUES (1,'EMAIL PENDIENTE DE VALIDACIÓN');
+INSERT INTO `person_status` (`id`, `name`) VALUES (2,'EMAIL VALIDADO');
+INSERT INTO `person_status` (`id`, `name`) VALUES (3,'EMAIL RECHAZADO');
 /*!40000 ALTER TABLE `person_status` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -98,9 +98,9 @@ CREATE TABLE `admin_status` (
 
 LOCK TABLES `admin_status` WRITE;
 /*!40000 ALTER TABLE `admin_status` DISABLE KEYS */;
-INSERT INTO `admin_status` (`id`, `name`) VALUES (1,'EMAIL PENDIENTE DE VALIDACIÓN');
-INSERT INTO `admin_status` (`id`, `name`) VALUES (2,'EMAIL VALIDADO');
-INSERT INTO `admin_status` (`id`, `name`) VALUES (3,'EMAIL RECHAZADO');
+INSERT INTO `admin_status` (`id`, `name`) VALUES (1,'PENDIENTE DE VALIDACIÓN');
+INSERT INTO `admin_status` (`id`, `name`) VALUES (2,'VALIDADO');
+INSERT INTO `admin_status` (`id`, `name`) VALUES (3,'RECHAZADO');
 /*!40000 ALTER TABLE `admin_status` ENABLE KEYS */;
 UNLOCK TABLES;
 --

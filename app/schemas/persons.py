@@ -7,14 +7,16 @@ class PersonsReduced(BaseModel):
     username: str
     name: str
     surname: str
-    accepted: bool
+    id_admin_status: int
+    id_person_status: int
 
 
 class Person(BaseModel):
     username: str
     name: str
     surname: str
-    accepted: bool
+    id_admin_status: int
+    id_person_status: int
 
 
 class PersonUsername(BaseModel):
