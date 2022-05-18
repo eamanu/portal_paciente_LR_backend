@@ -18,7 +18,7 @@ from app.config.config import (
 )
 from app.gear.local.bearer_token import BearerToken
 from app.gear.log.main_logger import MainLogger, logging
-from app.gear.mailer.mailer import send_validation_mail
+from app.gear.validation_mail.validation_mail import send_validation_mail
 from app.models.admin_status import AdminStatus as model_admin_status
 from app.models.category import Category as model_category
 from app.models.expiration_black_list import (
