@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.6.0
+* Fix desincronización con la Base de Datos.
+* Nuevo endpoint para el envio de mail para obtener turnos.
+
 ## 1.5.1
 * Posibilidad de configurar DEBUG_MAIL_VALIDATION para usar un mail de debug para tests.
 
