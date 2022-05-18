@@ -11,7 +11,10 @@ from app.config.config import SECRET_KEY, ALGORITHM
 from app.gear.local.local_impl import LocalImpl
 from app.gear.log.main_logger import MainLogger, logging
 from app.gear.mailer.mailer import validate_email
-from app.gear.recover_password.recover_password import send_recovery_password_mail, recover_password
+from app.gear.recover_password.recover_password import (
+    send_recovery_password_mail,
+    recover_password,
+)
 from app.main import get_db
 from app.routes import auth
 from app.routes.common import router_local
@@ -36,7 +39,6 @@ oauth_schema = OAuth2PasswordBearer(tokenUrl="/login")
 
 log = MainLogger()
 module = logging.getLogger(__name__)
-
 
 
 @router_local.get("/version")
@@ -71,7 +73,7 @@ async def login_person(
 
 
 @router_local.post("/logout", tags=["Login & Logout"])
-async def logout(token: str = Depends(oauth_schema)):
+async def logout(token: str = Depends(oauth_schema), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -83,16 +85,11 @@ async def logout(token: str = Depends(oauth_schema)):
         expires = datetime.fromtimestamp(payload.get("exp"))
         if expires is None:
             raise credentials_exception
-        LocalImpl().set_expiration_black_list(token)
+        LocalImpl(db).set_expiration_black_list(token)
         return {"msg": "good bye"}
 
     except JWTError:
         raise credentials_exception
-
-
-# @router_local.post("/createuser", response_model=ResponseOK, responses={417: {"model": ResponseNOK}}, tags=["User and person"])
-# async def create_user(user: schema_user):
-#    return LocalImpl().create_user(user)
 
 
 @router_local.post(
@@ -101,8 +98,10 @@ async def logout(token: str = Depends(oauth_schema)):
     responses={417: {"model": ResponseNOK}},
     tags=["Message"],
 )
-async def create_message(header: str, body: str, is_formatted: bool):
-    return LocalImpl().create_message(header, body, is_formatted)
+async def create_message(
+    header: str, body: str, is_formatted: bool, db: Session = Depends(get_db)
+):
+    return LocalImpl(db).create_message(header, body, is_formatted)
 
 
 @router_local.put(
@@ -111,8 +110,8 @@ async def create_message(header: str, body: str, is_formatted: bool):
     responses={417: {"model": ResponseNOK}},
     tags=["Message"],
 )
-async def update_message(message: Message):
-    return LocalImpl().update_message(message)
+async def update_message(message: Message, db: Session = Depends(get_db)):
+    return LocalImpl(db).update_message(message)
 
 
 @router_local.put(
@@ -121,8 +120,8 @@ async def update_message(message: Message):
     responses={417: {"model": ResponseNOK}},
     tags=["Message"],
 )
-async def delete_message(message_id: int):
-    return LocalImpl().delete_message(message_id)
+async def delete_message(message_id: int, db: Session = Depends(get_db)):
+    return LocalImpl(db).delete_message(message_id)
 
 
 @router_local.post(
@@ -131,8 +130,13 @@ async def delete_message(message_id: int):
     responses={417: {"model": ResponseNOK}},
     tags=["Message"],
 )
-async def send_message(message_id: int, category_id: int, is_for_all_categories: bool):
-    return LocalImpl().send_message(message_id, category_id, is_for_all_categories)
+async def send_message(
+    message_id: int,
+    category_id: int,
+    is_for_all_categories: bool,
+    db: Session = Depends(get_db),
+):
+    return LocalImpl(db).send_message(message_id, category_id, is_for_all_categories)
 
 
 @router_local.get(
@@ -141,8 +145,10 @@ async def send_message(message_id: int, category_id: int, is_for_all_categories:
     responses={417: {"model": ResponseNOK}},
     tags=["Message"],
 )
-async def get_messages_by_person(person_id: int, only_unread: bool):
-    return LocalImpl().get_messages(person_id, only_unread)
+async def get_messages_by_person(
+    person_id: int, only_unread: bool, db: Session = Depends(get_db)
+):
+    return LocalImpl(db).get_messages(person_id, only_unread)
 
 
 @router_local.get(
@@ -151,8 +157,8 @@ async def get_messages_by_person(person_id: int, only_unread: bool):
     responses={417: {"model": ResponseNOK}},
     tags=["Message"],
 )
-async def get_message(message_id: int):
-    return LocalImpl().get_message(message_id)
+async def get_message(message_id: int, db: Session = Depends(get_db)):
+    return LocalImpl(db).get_message(message_id)
 
 
 @router_local.get(
@@ -161,8 +167,8 @@ async def get_message(message_id: int):
     responses={417: {"model": ResponseNOK}},
     tags=["Message"],
 )
-async def get_all_messages():
-    return LocalImpl().get_all_messages()
+async def get_all_messages(db: Session = Depends(get_db)):
+    return LocalImpl(db).get_all_messages()
 
 
 @router_local.post(
@@ -171,8 +177,10 @@ async def get_all_messages():
     responses={417: {"model": ResponseNOK}},
     tags=["Message"],
 )
-async def set_message_read(person_id: int, message_id: int):
-    return LocalImpl().set_message_read(person_id, message_id)
+async def set_message_read(
+    person_id: int, message_id: int, db: Session = Depends(get_db)
+):
+    return LocalImpl(db).set_message_read(person_id, message_id)
 
 
 @router_local.post(
@@ -181,8 +189,8 @@ async def set_message_read(person_id: int, message_id: int):
     responses={417: {"model": ResponseNOK}},
     tags=["User and person"],
 )
-async def create_person(person: schema_create_person):
-    return LocalImpl().create_person(person)
+async def create_person(person: schema_create_person, db: Session = Depends(get_db)):
+    return LocalImpl(db).create_person(person)
 
 
 @router_local.put(
@@ -191,8 +199,8 @@ async def create_person(person: schema_create_person):
     responses={417: {"model": ResponseNOK}},
     tags=["User and person"],
 )
-async def update_person(person: schema_person):
-    return LocalImpl().update_person(person)
+async def update_person(person: schema_person, db: Session = Depends(get_db)):
+    return LocalImpl(db).update_person(person)
 
 
 @router_local.put(
@@ -201,37 +209,46 @@ async def update_person(person: schema_person):
     responses={417: {"model": ResponseNOK}},
     tags=["User and person"],
 )
-async def delete_person(person_id: int):
-    return LocalImpl().delete_person(person_id)
+async def delete_person(person_id: int, db: Session = Depends(get_db)):
+    return LocalImpl(db).delete_person(person_id)
 
 
 @router_local.get(
     "/getpersonbyid",
     response_model=schema_person,
     responses={417: {"model": ResponseNOK}},
-    tags=["User and person"]
+    tags=["User and person"],
 )
-async def get_person_by_id(person_id: int):
-    return LocalImpl().get_person_by_id(person_id)
+async def get_person_by_id(person_id: int, db: Session = Depends(get_db)):
+    return LocalImpl(db).get_person_by_id(person_id)
 
 
 @router_local.get(
     "/getpersonbyidentificationnumber",
     response_model=schema_person,
-responses={417: {"model": ResponseNOK}},
+    responses={417: {"model": ResponseNOK}},
     tags=["User and person"],
 )
-async def get_person_by_identification_number(person_identification_number: str):
-    return LocalImpl().get_person_by_identification_number(person_identification_number)
+async def get_person_by_identification_number(
+    person_identification_number: str, db: Session = Depends(get_db)
+):
+    return LocalImpl(db).get_person_by_identification_number(
+        person_identification_number
+    )
+
 
 @router_local.get(
     "/getfamilygroupbyidentificationnumbermaster",
     response_model=List[schema_person],
-responses={417: {"model": ResponseNOK}},
+    responses={417: {"model": ResponseNOK}},
     tags=["User and person"],
 )
-async def get_family_group_by_identification_number_master(person_identification_number_master: str):
-    return LocalImpl().get_family_group_by_identification_number_master(person_identification_number_master)
+async def get_family_group_by_identification_number_master(
+    person_identification_number_master: str, db: Session = Depends(get_db)
+):
+    return LocalImpl(db).get_family_group_by_identification_number_master(
+        person_identification_number_master
+    )
 
 
 @router_local.put(
@@ -240,8 +257,10 @@ async def get_family_group_by_identification_number_master(person_identification
     responses={417: {"model": ResponseNOK}},
     tags=["Admin"],
 )
-async def set_admin_status_to_person(person_id: int, admin_status_id: int):
-    return LocalImpl().set_admin_status_to_person(person_id, admin_status_id)
+async def set_admin_status_to_person(
+    person_id: int, admin_status_id: int, db: Session = Depends(get_db)
+):
+    return LocalImpl(db).set_admin_status_to_person(person_id, admin_status_id)
 
 
 @router_local.post(
@@ -250,8 +269,10 @@ async def set_admin_status_to_person(person_id: int, admin_status_id: int):
     responses={417: {"model": ResponseNOK}},
     tags=["User and person"],
 )
-async def create_person_and_user(person_user: schema_person_user):
-    return LocalImpl().create_person_and_user(person_user)
+async def create_person_and_user(
+    person_user: schema_person_user, db: Session = Depends(get_db)
+):
+    return LocalImpl(db).create_person_and_user(person_user)
 
 
 @router_local.get(
@@ -260,8 +281,8 @@ async def create_person_and_user(person_user: schema_person_user):
     responses={417: {"model": ResponseNOK}},
     tags=["Admin"],
 )
-async def get_admin_status():
-    return LocalImpl().get_admin_status()
+async def get_admin_status(db: Session = Depends(get_db)):
+    return LocalImpl(db).get_admin_status()
 
 
 @router_local.get(
@@ -270,8 +291,8 @@ async def get_admin_status():
     responses={417: {"model": ResponseNOK}},
     tags=["User and person"],
 )
-async def get_person_status():
-    return LocalImpl().get_person_status()
+async def get_person_status(db: Session = Depends(get_db)):
+    return LocalImpl(db).get_person_status()
 
 
 @router_local.get(
@@ -280,8 +301,8 @@ async def get_person_status():
     responses={417: {"model": ResponseNOK}},
     tags=["User and person"],
 )
-async def get_roles():
-    return LocalImpl().get_roles()
+async def get_roles(db: Session = Depends(get_db)):
+    return LocalImpl(db).get_roles()
 
 
 @router_local.get(
@@ -290,8 +311,8 @@ async def get_roles():
     responses={417: {"model": ResponseNOK}},
     tags=["User and person"],
 )
-async def get_categories():
-    return LocalImpl().get_categories()
+async def get_categories(db: Session = Depends(get_db)):
+    return LocalImpl(db).get_categories()
 
 
 @router_local.get(
@@ -300,8 +321,8 @@ async def get_categories():
     responses={417: {"model": ResponseNOK}},
     tags=["User and person"],
 )
-async def get_genders():
-    return LocalImpl().get_genders()
+async def get_genders(db: Session = Depends(get_db)):
+    return LocalImpl(db).get_genders()
 
 
 @router_local.post(
@@ -311,16 +332,24 @@ async def get_genders():
     tags=["User and person"],
 )
 async def upload_identification_images(
-    person_id: str, file1: UploadFile = File(...), file2: UploadFile = File(...)
+    person_id: str,
+    file1: UploadFile = File(...),
+    file2: UploadFile = File(...),
+    db: Session = Depends(get_db),
 ):
-    return await LocalImpl().upload_identification_images(person_id, file1, file2)
+    return await LocalImpl(db).upload_identification_images(person_id, file1, file2)
 
 
-@router_local.post("/downloadidentificationimage",
+@router_local.post(
+    "/downloadidentificationimage",
     response_model=ResponseOK,
-    responses={417: {"model": ResponseNOK}}, tags=["User and person"])
-async def download_identification_image(person_id: str, is_front: bool):
-    return LocalImpl().download_identification_image(person_id, is_front)
+    responses={417: {"model": ResponseNOK}},
+    tags=["User and person"],
+)
+async def download_identification_image(
+    person_id: str, is_front: bool, db: Session = Depends(get_db)
+):
+    return LocalImpl(db).download_identification_image(person_id, is_front)
 
 
 @router_local.get("/validate-email/{token}/", tags=["User and person"])
@@ -334,7 +363,9 @@ async def send_email_to_recover_password(email: str):
     if not result:
         log.log_info_message("Mail don't sent to recover password", module)
 
-    return ResponseOK(message="A email was sent you if the email exists in the system.", code=200)
+    return ResponseOK(
+        message="A email was sent you if the email exists in the system.", code=200
+    )
 
 
 @router_local.get("/change-password", tags=["User and person"])

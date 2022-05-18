@@ -1,11 +1,10 @@
 import base64
 import uuid
-
 from datetime import datetime, timedelta
 from typing import Optional, Union
 
 from fastapi import Request, status, File, UploadFile
-from fastapi.responses import Response, FileResponse
+from fastapi.responses import Response
 from jose.exceptions import JWTError
 from sqlalchemy.exc import PendingRollbackError
 from sqlalchemy.orm import Session
@@ -17,40 +16,40 @@ from app.config.config import (
     LOCAL_FILE_UPLOAD_DIRECTORY,
     LOCAL_FILE_DOWNLOAD_DIRECTORY,
 )
-from app.config.database import SessionLocal
 from app.gear.local.bearer_token import BearerToken
 from app.gear.log.main_logger import MainLogger, logging
+from app.gear.mailer.mailer import send_validation_mail
+from app.models.admin_status import AdminStatus as model_admin_status
+from app.models.category import Category as model_category
 from app.models.expiration_black_list import (
     ExpirationBlackList as model_expiration_black_list,
 )
+from app.models.genders import Gender as model_gender
 from app.models.message import Message as model_message
 from app.models.permission import Permission
 from app.models.person import Person as model_person
 from app.models.person_message import PersonMessage as model_person_message
-from app.models.user import User as model_user
 from app.models.person_status import PersonStatus as model_person_status
-from app.models.admin_status import AdminStatus as model_admin_status
 from app.models.role import Role as model_role
-from app.models.category import Category as model_category
-from app.models.genders import Gender as model_gender
+from app.models.user import User as model_user
 from app.schemas.category_enum import CategoryEnum
 from app.schemas.message import Message, ReadMessage
 from app.schemas.person import (
     Person as schema_person,
     CreatePerson as schema_create_person,
-    CreatePersonResponse as schema_create_person_response,
 )
 from app.schemas.person_user import PersonUser as schema_person_user
 from app.schemas.responses import ResponseNOK, ResponseOK
 from app.schemas.user import User as schema_user
-from app.gear.mailer.mailer import send_validation_mail
+
 
 class LocalImpl:
 
-    db: Session = SessionLocal()
-
     log = MainLogger()
     module = logging.getLogger(__name__)
+
+    def __init__(self, db: Session):
+        self.db = db
 
     async def filter_request_for_authorization(self, request: Request, call_next):
 
@@ -570,20 +569,25 @@ class LocalImpl:
         # s_person = self.get_schema_person_from_model_person(existing_person)
         s_person = schema_person.from_orm(existing_person)
 
-        s_person.family_group = self.get_family_group_by_identification_number_master(s_person.identification_number)
+        s_person.family_group = self.get_family_group_by_identification_number_master(
+            s_person.identification_number
+        )
 
         return s_person
 
-    def get_family_group_by_identification_number_master(self, identification_number_master: str):
+    def get_family_group_by_identification_number_master(
+        self, identification_number_master: str
+    ):
 
         s_family_group = []
 
         family_group = (
             self.db.query(model_person)
-                .where(
-                model_person.identification_number_master == identification_number_master
+            .where(
+                model_person.identification_number_master
+                == identification_number_master
             )
-                .all()
+            .all()
         )
 
         filter_family = [
@@ -608,9 +612,13 @@ class LocalImpl:
         s_person.surname = m_person.surname
         s_person.birthdate = m_person.birthdate
         # s_person.identification_front_image = m_person.identification_front_image
-        s_person.identification_front_image_file_type = m_person.identification_front_image_file_type
+        s_person.identification_front_image_file_type = (
+            m_person.identification_front_image_file_type
+        )
         # s_person.identification_back_image = m_person.identification_back_image
-        s_person.identification_back_image_file_type = m_person.identification_back_image_file_type
+        s_person.identification_back_image_file_type = (
+            m_person.identification_back_image_file_type
+        )
         s_person.id_person_status = m_person.id_person_status
         s_person.id_admin_status = m_person.id_admin_status
         s_person.id_gender = m_person.id_gender
@@ -628,7 +636,9 @@ class LocalImpl:
         s_person.is_diabetic = m_person.is_diabetic
         s_person.is_hypertensive = m_person.is_hypertensive
         s_person.is_chronic_kidney_disease = m_person.is_chronic_kidney_disease
-        s_person.is_chronic_respiratory_disease = m_person.is_chronic_respiratory_disease
+        s_person.is_chronic_respiratory_disease = (
+            m_person.is_chronic_respiratory_disease
+        )
         s_person.address_street = m_person.address_street
         s_person.address_number = m_person.address_number
         s_person.email = m_person.email
@@ -743,7 +753,6 @@ class LocalImpl:
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message=f"Error: {str(e)}", code=417)
 
-
     def get_person_status(self):
         try:
             result = []
@@ -848,7 +857,6 @@ class LocalImpl:
             return ResponseNOK(message=f"Error: {str(e)}", code=417)
         return ResponseOK(message="Files uploaded successfully.", code=201)
 
-
     def download_identification_image(self, person_id: str, is_front: bool):
         try:
 
@@ -858,24 +866,49 @@ class LocalImpl:
             )
 
             if existing_person is None:
-                return ResponseNOK(message=f"Nonexistent person_id: {str(person_id)}", code=417)
+                return ResponseNOK(
+                    message=f"Nonexistent person_id: {str(person_id)}", code=417
+                )
 
             destination_file_path = LOCAL_FILE_DOWNLOAD_DIRECTORY
 
             if is_front:
                 if existing_person.identification_front_image_file_type is not None:
-                    file_name = str(uuid.uuid4()) + "." + existing_person.identification_front_image_file_type[
-                                                          (existing_person.identification_front_image_file_type.rfind('/') + 1):]
-                    base64_img_bytes = existing_person.identification_front_image.encode('utf-8')
+                    file_name = (
+                        str(uuid.uuid4())
+                        + "."
+                        + existing_person.identification_front_image_file_type[
+                            (
+                                existing_person.identification_front_image_file_type.rfind(
+                                    "/"
+                                )
+                                + 1
+                            ) :
+                        ]
+                    )
+                    base64_img_bytes = (
+                        existing_person.identification_front_image.encode("utf-8")
+                    )
             else:
                 if existing_person.identification_back_image_file_type is not None:
-                    file_name = str(uuid.uuid4()) + "." + existing_person.identification_back_image_file_type[
-                                                          (existing_person.identification_back_image_file_type.rfind(
-                                                              '/') + 1):]
-                    base64_img_bytes = existing_person.identification_back_image.encode('utf-8')
+                    file_name = (
+                        str(uuid.uuid4())
+                        + "."
+                        + existing_person.identification_back_image_file_type[
+                            (
+                                existing_person.identification_back_image_file_type.rfind(
+                                    "/"
+                                )
+                                + 1
+                            ) :
+                        ]
+                    )
+                    base64_img_bytes = existing_person.identification_back_image.encode(
+                        "utf-8"
+                    )
 
             if file_name is not None:
-                with open(destination_file_path + file_name, 'wb') as file_to_save:
+                with open(destination_file_path + file_name, "wb") as file_to_save:
                     decoded_image_data = base64.decodebytes(base64_img_bytes)
                     file_to_save.write(decoded_image_data)
                 file_to_save.close()
@@ -885,4 +918,8 @@ class LocalImpl:
         except Exception as e:
             self.log.log_error_message(e, self.module)
             return ResponseNOK(message=f"Error: {str(e)}", code=417)
-        return ResponseOK(value="/static/" + file_name, message="File downloaded successfully.", code=201)
+        return ResponseOK(
+            value="/static/" + file_name,
+            message="File downloaded successfully.",
+            code=201,
+        )

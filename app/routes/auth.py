@@ -10,9 +10,8 @@ from app.auth.auth import get_user
 from app.config.config import ACCESS_TOKEN_EXPIRE_MINUTES
 from app.gear.local.local_impl import LocalImpl
 from app.main import get_db
-from app.schemas.person import PersonLogged
-from app.schemas.person_status_enum import PersonStatusEnum
 from app.schemas.admin_status_enum import AdminStatusEnum
+from app.schemas.person import PersonLogged
 
 
 def login_for_access_token(
@@ -52,24 +51,23 @@ def login_person(
 
     # 1. Query para traer Person y Familia
     user = get_user(username)
-    family_boss = LocalImpl().get_person_by_id(user.id_person)
+    family_boss = LocalImpl(db).get_person_by_id(user.id_person)
 
     # 2. Check si el user ya valido email
     if user.is_mail_validate != 1:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Mail not email_validated."
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Mail not email_validated."
         )
 
     # 3. Check si fue aprobado por el admin
     if family_boss.id_admin_status != AdminStatusEnum.validated.value:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Wait for approval."
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Wait for approval."
         )
 
     return PersonLogged(
         id_person=user.id_person,
         access_token=access_token,
         token_type="bearer",
-        data=family_boss)
+        data=family_boss,
+    )
