@@ -1,8 +1,7 @@
 import datetime
-from pathlib import Path
 from typing import Union
 
-from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
+from fastapi_mail import MessageSchema
 from jose import jwt
 from jose.exceptions import JWTError
 from sqlalchemy.orm import Session
@@ -10,32 +9,16 @@ from sqlalchemy.orm import Session
 from app.config.config import (
     SECRET_KEY,
     ALGORITHM,
-    MAIL_PORT,
-    MAIL_PASSWORD,
-    MAIL_SERVER,
-    MAIL_USERNAME,
-    MAIL_FROM,
     RECOVERY_PASSWORD_URL,
-    TEMPLATE_FOLDER_RECOVERY_PASSWORD,
     DEBUG_MAIL_VALIDATION,
 )
 from app.config.database import SessionLocal
 from app.gear.log.main_logger import MainLogger, logging
+from app.gear.mailer.mailer import send_email
 from app.models.person import Person
 from app.models.user import User
-from app.schemas.responses import ResponseOK, ResponseNOK
 from app.schemas.admin_status_enum import AdminStatusEnum
-
-conf = ConnectionConfig(
-    MAIL_USERNAME=MAIL_USERNAME,
-    MAIL_FROM=MAIL_FROM,
-    MAIL_PASSWORD=MAIL_PASSWORD,
-    MAIL_PORT=MAIL_PORT,
-    MAIL_SERVER=MAIL_SERVER,
-    MAIL_TLS=True,
-    MAIL_SSL=False,
-    TEMPLATE_FOLDER=Path(TEMPLATE_FOLDER_RECOVERY_PASSWORD),
-)
+from app.schemas.responses import ResponseOK, ResponseNOK
 
 
 db: Session = SessionLocal()
@@ -44,6 +27,8 @@ log = MainLogger()
 module = logging.getLogger(__name__)
 
 JWT_AUD = "recovery-password"
+
+RECOVERY_PASSWORD_TEMPLATE = "recovery-password.html"
 
 
 class ValidationError(Exception):
@@ -91,22 +76,24 @@ async def send_recovery_password_mail(email: str) -> bool:
 
     if user.is_admin:
         log.log_info_message(
-            f"[DANGER] Trying to recover admin user password", module,
+            f"[DANGER] Trying to recover admin user password",
+            module,
         )
         return False
 
     recover_url = generate_validation_url(user)
-    recipients = DEBUG_MAIL_VALIDATION if DEBUG_MAIL_VALIDATION else existing_person.email  # TODO: REMOVE THIS BEFORE GO TO PRODUCTION
+    recipients = (
+        DEBUG_MAIL_VALIDATION if DEBUG_MAIL_VALIDATION else existing_person.email
+    )  # TODO: REMOVE THIS BEFORE GO TO PRODUCTION
     await _send_recovery_password_mail(
-        recipients,
-        existing_person.name,
-        existing_person.surname,
-        recover_url
+        recipients, existing_person.name, existing_person.surname, recover_url
     )
     return True
 
 
-async def _send_recovery_password_mail(recipients: str, name: str, surname: str, validation_link: str):
+async def _send_recovery_password_mail(
+    recipients: str, name: str, surname: str, validation_link: str
+):
     body = {"name": name, "surname": surname, "validation_link": validation_link}
 
     message = MessageSchema(
@@ -115,22 +102,22 @@ async def _send_recovery_password_mail(recipients: str, name: str, surname: str,
         template_body=body,
         subtype="html",
     )
-
-    fm = FastMail(conf)
-    await fm.send_message(message, template_name="recovery-password.html")
+    await send_email(message, RECOVERY_PASSWORD_TEMPLATE)
 
 
 async def recover_password(token: str, password: str) -> Union[ResponseNOK, ResponseOK]:
     to_verify = {
-        'verify_signature': True,
-        'verify_aud': True,
-        'verify_exp': True,
-        'require_aud': True,
-        'require_iat': True,
-        'require_exp': True,
-        'require_iss': True,
+        "verify_signature": True,
+        "verify_aud": True,
+        "verify_exp": True,
+        "require_aud": True,
+        "require_iat": True,
+        "require_exp": True,
+        "require_iss": True,
     }
-    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], options=to_verify, audience=JWT_AUD)
+    payload = jwt.decode(
+        token, SECRET_KEY, algorithms=[ALGORITHM], options=to_verify, audience=JWT_AUD
+    )
     try:
         username = payload["iss"]
         user = db.query(User).where(User.username == username).first()
@@ -143,8 +130,12 @@ async def recover_password(token: str, password: str) -> Union[ResponseNOK, Resp
         db.commit()
     except (KeyError, ValidationError) as err:
         log.log_error_message(f"Error: {str(err)}", module)
-        return ResponseNOK(message="Something wrong, password cannot be change.", code=400)
+        return ResponseNOK(
+            message="Something wrong, password cannot be change.", code=400
+        )
     except JWTError as err:
         log.log_error_message(f"Something wrong with the token decode: {str(err)}")
-        return ResponseNOK(message="Something wrong, password cannot be change.", code=400)
+        return ResponseNOK(
+            message="Something wrong, password cannot be change.", code=400
+        )
     return ResponseOK(message="User password change", code=200)

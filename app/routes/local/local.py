@@ -10,11 +10,12 @@ from sqlalchemy.orm import Session
 from app.config.config import SECRET_KEY, ALGORITHM
 from app.gear.local.local_impl import LocalImpl
 from app.gear.log.main_logger import MainLogger, logging
-from app.gear.mailer.mailer import validate_email
 from app.gear.recover_password.recover_password import (
     send_recovery_password_mail,
     recover_password,
 )
+from app.gear.validation_mail.validation_mail import validate_email
+from app.gear.turnos.turnos_mailer import send_turno_mail
 from app.main import get_db
 from app.routes import auth
 from app.routes.common import router_local
@@ -371,3 +372,11 @@ async def send_email_to_recover_password(email: str):
 @router_local.get("/change-password", tags=["User and person"])
 async def change_password_password(token: str, password: str):
     return await recover_password(token, password)
+
+
+@router_local.post("/send-turno-mail", tags=["User and person"])
+async def send_turno_mail(person_id: str, subject: str, body: str):
+    await send_turno_mail(person_id, subject, body)
+    return ResponseOK(
+        message="Email send it", code=200
+    )
