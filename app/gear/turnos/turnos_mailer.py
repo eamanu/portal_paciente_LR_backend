@@ -27,7 +27,7 @@ async def send_turno_mail(person_id: str, subject: str, body: str) -> bool:
         subject=subject,
         recipients=[recipients],  # List of recipients, as many as you can pass
         body=body,
-        subtype="html",
+        # subtype="html",
     )
 
     # TODO: Almacenar person_id + subject (y un status? o fecha?) en la base de datos,

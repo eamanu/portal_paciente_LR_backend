@@ -375,7 +375,7 @@ async def change_password_password(token: str, password: str):
 
 
 @router_local.post("/send-turno-mail", tags=["User and person"])
-async def send_turno_mail(person_id: str, subject: str, body: str):
+async def enviar_turno_mail(person_id: str, subject: str, body: str):
     await send_turno_mail(person_id, subject, body)
     return ResponseOK(
         message="Email send it", code=200
