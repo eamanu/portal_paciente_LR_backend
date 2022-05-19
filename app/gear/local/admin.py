@@ -1,12 +1,10 @@
-from app.config.database import SessionLocal
 from sqlalchemy.orm import Session
-from app.schemas.persons import PersonsReduced, Person, PersonUsername
+
 from app.models.person import Person as model_person
 from app.models.user import User as model_user
-from app.schemas.returned_object import ReturnMessage
 from app.schemas.admin_status_enum import AdminStatusEnum
-
-db: Session = SessionLocal()
+from app.schemas.persons import PersonsReduced, PersonUsername
+from app.schemas.returned_object import ReturnMessage
 
 
 # TODO: dev purpose. remove this
@@ -23,7 +21,7 @@ class Persons():
         self.is_deleted = is_deleted
 
 
-def list_of_persons(only_accepted: bool):
+def list_of_persons(only_accepted: bool, db: Session):
     """
     Return list of persons, only name surname and if is accepted or
     not in the system.
@@ -60,36 +58,37 @@ def list_of_persons(only_accepted: bool):
                                                 surname=p.surname,
                                                 id_admin_status=p.id_admin_status,
                                                 id_person_status=p.id_person_status))
-
-
     return persons_to_return
 
 
-def list_of_persons_accepted():
-    return list_of_persons(True)
+def list_of_persons_accepted(db: Session):
+    return list_of_persons(True, db)
 
-def list_of_persons_to_accept():
+
+def list_of_persons_to_accept(db: Session):
     """
     Return list of persons, only name and surname of persons that
     need to be accepted.
     """
-    return list_of_persons(False)
+    return list_of_persons(False, db)
 
-def list_of_persons_in_general():
+
+def list_of_persons_in_general(db: Session):
     """
     Return list of persons, without considering status.
     """
-    return list_of_persons(None)
-
-def accept_a_person(person_username: PersonUsername):
-    return change_person_status_by_admin(person_username, AdminStatusEnum.validated.value)
+    return list_of_persons(None, db)
 
 
-def not_accept_a_person(person_username: PersonUsername):
-    return change_person_status_by_admin(person_username, AdminStatusEnum.validation_rejected.value)
+def accept_a_person(person_username: PersonUsername, db: Session):
+    return change_person_status_by_admin(person_username, AdminStatusEnum.validated.value, db)
 
 
-def change_person_status_by_admin(person_username: PersonUsername, admin_status_id: int):
+def not_accept_a_person(person_username: PersonUsername, db: Session):
+    return change_person_status_by_admin(person_username, AdminStatusEnum.validation_rejected.value, db)
+
+
+def change_person_status_by_admin(person_username: PersonUsername, admin_status_id: int, db: Session):
     try:
         existing_user = db.query(model_user).where(model_user.username == person_username.username).first()
 
@@ -111,8 +110,7 @@ def change_person_status_by_admin(person_username: PersonUsername, admin_status_
     return ReturnMessage(message="Person updated successfully.", code=201)
 
 
-
-def remove_a_person(person_username: PersonUsername):
+def remove_a_person(person_username: PersonUsername, db: Session):
     try:
         existing_user = db.query(model_user).where(model_user.username == person_username.username).first()
 
