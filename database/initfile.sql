@@ -9,9 +9,11 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
-/* CREATE DATABASE IF NOT EXISTS `portal_paciente_LR`;*/
+CREATE DATABASE IF NOT EXISTS `portal_paciente_LR`;
 
-/* GRANT ALL ON `portal_paciente_LR`.* TO 'root'@'%';*/
+USE `portal_paciente_LR`;
+
+GRANT ALL ON `portal_paciente_LR`.* TO 'root'@'%';
 
 DROP TABLE IF EXISTS `category`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -270,7 +272,7 @@ CREATE TABLE `person` (
   `id_identification_type_master` bigint(20) DEFAULT NULL,
   `is_deleted` tinyint DEFAULT NULL,
   `id_patient` bigint(20) DEFAULT NULL,
-  `id_admin_status` tinyint DEFAULT NULL,
+  `id_admin_status` bigint(20) NOT NULL DEFAULT '1',
   `phone_number` varchar(100) COLLATE latin1_spanish_ci DEFAULT NULL,
   `department` varchar(200) COLLATE latin1_spanish_ci DEFAULT NULL,
   `locality` varchar(200) COLLATE latin1_spanish_ci DEFAULT NULL,
@@ -279,7 +281,7 @@ CREATE TABLE `person` (
   `identification_back_image` longtext COLLATE latin1_spanish_ci,
   `identification_front_image_file_type` varchar(45) COLLATE latin1_spanish_ci,
   `identification_back_image_file_type` varchar(45) COLLATE latin1_spanish_ci,
-  `id_person_status` bigint(20) DEFAULT NULL,
+  `id_person_status` bigint(20) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_spanish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
