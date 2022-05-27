@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.6.1
+* Fix error de conexión con Base de datos para el recupero de contraseña y validación de email.
+
 ## 1.6.0
 * Fix desincronización con la Base de Datos.
 * Nuevo endpoint para el envio de mail para obtener turnos.
