@@ -12,14 +12,12 @@ from app.config.config import (
     VALIDATION_MAIL_URL,
     DEBUG_MAIL_VALIDATION,
 )
-from app.config.database import SessionLocal
 from app.gear.log.main_logger import MainLogger, logging
 from app.gear.mailer.mailer import send_email
 from app.models.person import Person
 from app.models.user import User
 from app.schemas.responses import ResponseNOK, ResponseOK
 
-db: Session = SessionLocal()
 
 log = MainLogger()
 module = logging.getLogger(__name__)
@@ -33,7 +31,7 @@ class ValidationError(Exception):
     """Some Error during the validation mail"""
 
 
-async def send_validation_mail(person_id: str) -> bool:
+async def send_validation_mail(person_id: str, db: Session) -> bool:
     existing_person = (
         db.query(Person).where(Person.id == person_id).first()
     )  # type: Person
@@ -85,7 +83,7 @@ async def _send_email(recipients: str, name: str, surname: str, validation_link:
     await send_email(message, VALIDATION_MAIL_TEMPLATE)
 
 
-async def validate_email(token: str) -> Union[ResponseNOK, ResponseOK]:
+async def validate_email(token: str, db: Session) -> Union[ResponseNOK, ResponseOK]:
     to_verify = {
         'verify_signature': True,
         'verify_aud': True,

@@ -1,5 +1,6 @@
 import os
 
+
 # region Base API names
 
 LR_BASE_API = "/portalpaciente/api/v1"
@@ -8,7 +9,7 @@ LR_BASE_API = "/portalpaciente/api/v1"
 
 # region openssl rand -hex 32
 
-SECRET_KEY = os.getenv("SECRET_KEY", "i-hate-w1nd0w$$")  # TODO: Remove this
+SECRET_KEY = os.getenv("SECRET_KEY", "i-hate-w1nd0w$$")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 240
 

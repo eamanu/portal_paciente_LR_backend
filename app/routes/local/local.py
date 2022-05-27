@@ -354,13 +354,13 @@ async def download_identification_image(
 
 
 @router_local.get("/validate-email/{token}/", tags=["User and person"])
-async def val_email(token: str):
-    return await validate_email(token)
+async def val_email(token: str, db: Session = Depends(get_db)):
+    return await validate_email(token, db)
 
 
 @router_local.get("/recover-password", tags=["User and person"])
-async def send_email_to_recover_password(email: str):
-    result = await send_recovery_password_mail(email)
+async def send_email_to_recover_password(email: str, db: Session = Depends(get_db)):
+    result = await send_recovery_password_mail(email, db)
     if not result:
         log.log_info_message("Mail don't sent to recover password", module)
 
@@ -370,8 +370,8 @@ async def send_email_to_recover_password(email: str):
 
 
 @router_local.get("/change-password", tags=["User and person"])
-async def change_password_password(token: str, password: str):
-    return await recover_password(token, password)
+async def change_password_password(token: str, password: str, db: Session = Depends(get_db)):
+    return await recover_password(token, password, db)
 
 
 @router_local.post("/send-turno-mail", tags=["User and person"])

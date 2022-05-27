@@ -873,7 +873,7 @@ class LocalImpl:
             self.db.commit()
 
             # validating email
-            await send_validation_mail(person_id)
+            await send_validation_mail(person_id, self.db)
 
         except Exception as e:
             self.db.rollback()

@@ -12,7 +12,6 @@ from app.config.config import (
     RECOVERY_PASSWORD_URL,
     DEBUG_MAIL_VALIDATION,
 )
-from app.config.database import SessionLocal
 from app.gear.log.main_logger import MainLogger, logging
 from app.gear.mailer.mailer import send_email
 from app.models.person import Person
@@ -20,8 +19,6 @@ from app.models.user import User
 from app.schemas.admin_status_enum import AdminStatusEnum
 from app.schemas.responses import ResponseOK, ResponseNOK
 
-
-db: Session = SessionLocal()
 
 log = MainLogger()
 module = logging.getLogger(__name__)
@@ -49,7 +46,7 @@ def generate_validation_url(user: User) -> str:
     return url
 
 
-async def send_recovery_password_mail(email: str) -> bool:
+async def send_recovery_password_mail(email: str, db: Session) -> bool:
     existing_person = (
         db.query(Person).where(Person.email == email).first()
     )  # type: Person
@@ -105,7 +102,7 @@ async def _send_recovery_password_mail(
     await send_email(message, RECOVERY_PASSWORD_TEMPLATE)
 
 
-async def recover_password(token: str, password: str) -> Union[ResponseNOK, ResponseOK]:
+async def recover_password(token: str, password: str, db: Session) -> Union[ResponseNOK, ResponseOK]:
     to_verify = {
         "verify_signature": True,
         "verify_aud": True,
