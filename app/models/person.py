@@ -46,7 +46,7 @@ class Person(Base):
             is_diabetic: bool, is_hypertensive: bool, is_chronic_respiratory_disease: bool,
             is_chronic_kidney_disease: bool, identification_number_master: str, id_identification_type: int,
             id_identification_type_master: int, is_deleted: bool, id_patient: int, id_admin_status: int,
-            phone_number: str, department:str, locality: str, email: str, id_person_status: int):
+            phone_number: str, department: str, locality: str, email: str, id_person_status: int, *args, **kargs):
         self.id = id
         self.surname = surname
         self.name = name
