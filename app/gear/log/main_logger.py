@@ -11,6 +11,7 @@ file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
 
+
 class Singleton(type):
     _instances = {}
 
@@ -20,6 +21,7 @@ class Singleton(type):
         else:
             cls._instances[cls].__init__(*args, **kwargs)
         return cls._instances[cls]
+
 
 class MainLogger(metaclass=Singleton):
 

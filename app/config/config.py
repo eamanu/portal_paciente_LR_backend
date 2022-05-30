@@ -27,6 +27,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 WHITE_LIST_PATH = (
     LR_BASE_API + "/login",
+    LR_BASE_API + "/login-admin",
     LR_BASE_API + "/logout",
     LR_BASE_API + "/static",
     "/docs",
@@ -47,7 +48,7 @@ LOG_PATH = './app.log'
 # region Operational mode
 
 DEBUG_ENABLED = False
-AUTHORIZATION_ENABLED = False
+AUTHORIZATION_ENABLED = True
 
 # endregion
 

@@ -60,7 +60,8 @@ from app.config.config import LOCAL_FILE_DOWNLOAD_DIRECTORY
 
 @app.middleware("http")
 async def filter_request_for_authorization(request: Request, call_next):
-    return await LocalImpl(None).filter_request_for_authorization(request, call_next)
+    db = next(get_db())
+    return await LocalImpl(db).filter_request_for_authorization(request, call_next)
 
 
 app.mount(

@@ -96,7 +96,10 @@ class LocalImpl:
                 )
             # Verificación de permisos...
             if not self.is_user_authorized(
-                request.scope["path"], request.scope["method"], bearer_token.payload
+                request.scope["path"],
+                request.scope["method"],
+                bearer_token.payload,
+                request,
             ):
                 self.log.log_error_message(
                     "Request not authorized for user "
@@ -226,13 +229,21 @@ class LocalImpl:
         self.delete_old_tokens()
         return is_expired
 
-    @staticmethod
-    def is_user_authorized(path: str, method: str, payload: Optional[dict]) -> bool:
+    def is_user_authorized(
+        self, path: str, method: str, payload: Optional[dict], request=None
+    ) -> bool:
         try:
             if payload is None:
                 return False
             username = payload.get("sub")
-            return Permission.user_is_authorized(username, path, method)
+
+            # check if the user is in DB
+            user = self.db.query(model_user).where(model_user.username == username).first()
+            if user is None:
+                return False
+
+            # return Permission.user_is_authorized(username, path, method)
+            return Permission.user_is_authorized2(username, request)
         except Exception as e:
             MainLogger().log_error_message(e, logging.getLogger(__name__))
             return False
@@ -465,7 +476,6 @@ class LocalImpl:
             return ResponseNOK(value="", message="Person not created.", code=417)
 
     def update_person(self, person: schema_person) -> Union[ResponseOK, ResponseNOK]:
-
         try:
             updated_person = model_person(**person.dict())
 

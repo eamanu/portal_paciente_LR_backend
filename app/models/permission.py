@@ -1,6 +1,8 @@
 import re
 
 from sqlalchemy import Column, Integer, String
+from starlette.requests import Request
+from starlette.routing import Match
 
 from app.config.config import DEBUG_ENABLED
 from app.config.database import Base
@@ -9,6 +11,11 @@ from app.models.role_permission import RolePermission
 from app.models.user import User
 from app.models.user_role import UserRole
 
+
+ADMIN_ROUTES = ['create_message', 'update_message', 'delete_message', 'send_message',
+                'set_admin_status_to_person', 'get_admin_status', 'Remove a Person',
+                'Deny access to a Person', 'Accept a Person', 'List of id_admin_status Person',
+                'List of id_admin_status Person', 'List of persons']
 
 
 class Permission(Base):
@@ -47,3 +54,23 @@ class Permission(Base):
                 return True
 
         return False
+
+    @staticmethod
+    def user_is_authorized2(username: str, request: Request) -> bool:
+        db = SessionLocal()
+        routes = request.app.router.routes
+
+        name = ''
+
+        for route in routes:
+            match, scope = route.matches(request)
+            if match == Match.FULL:
+                name = route.name
+
+        user = db.query(User).where(User.username == username).first()
+
+        if name in ADMIN_ROUTES:
+            if user.is_admin:
+                return True
+            return False
+        return True
