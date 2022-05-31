@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.0.0
+* Se activa manejo de TOKEN JWT.
+* Se agregan las queries de HSI.
+
 ## 1.6.1
 * Fix error de conexión con Base de datos para el recupero de contraseña y validación de email.
 
