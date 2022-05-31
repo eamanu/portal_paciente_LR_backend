@@ -57,11 +57,11 @@ class LocalImpl:
             print(vars(request))
 
         # TODO: Check if this is necessary:
-        """
+        #  Look a way to respond to preflighs from frontend.
+
         if request.method == "OPTIONS":
             return Response(
                 status_code=status.HTTP_204_NO_CONTENT,
-                # should be added to database ?
                 headers={
                     "Access-Control-Allow-Origin": "*",
                     "Access-Control-Allow-Methods": "POST, GET, OPTIONS, DELETE",
@@ -70,7 +70,7 @@ class LocalImpl:
                     "Content-type": "application/json"
                 }
             )
-        """
+
         if AUTHORIZATION_ENABLED and (request.scope["path"] not in WHITE_LIST_PATH):
 
             auth_token = request.headers.get("Authorization")

@@ -26,6 +26,14 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 # region Whitelisted Paths
 
 WHITE_LIST_PATH = (
+    LR_BASE_API + "/institutions/all",
+    LR_BASE_API + "/parametric/identificationtypes",
+    LR_BASE_API + "/recover-password",
+    LR_BASE_API + "/change-password",
+    LR_BASE_API + "/validate-email",
+    LR_BASE_API + "/createpersonanduser",
+    LR_BASE_API + "/createperson",
+    LR_BASE_API + "/uploadidentificationimages",
     LR_BASE_API + "/login",
     LR_BASE_API + "/login-admin",
     LR_BASE_API + "/logout",
