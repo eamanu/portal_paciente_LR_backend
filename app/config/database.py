@@ -16,7 +16,7 @@ MYSQL = 'mysql'
 if DATABASE_DEFAULT == SQLITE:
     engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 else:
-    engine = create_engine(DATABASE_URL)
+    engine = create_engine(DATABASE_URL, pool_size=20, max_overflow=0)
 
 conn = engine.connect()
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

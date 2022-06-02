@@ -7,7 +7,7 @@ from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
 from app.config.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
-from app.config.database import SessionLocal
+from app.main import get_db
 from app.models.user import User
 from app.schemas.token_data import TokenData
 from app.gear.local.local_impl import LocalImpl
@@ -21,19 +21,23 @@ module = logging.getLogger(__name__)
 
 
 # TODO: get_user no debería estar en auth.py, debería estar
-# en algún lado más general.
+#  en algún lado más general.
 def get_user(username: str) -> Optional[User]:
     # For some issue we need some attemps before failed
     # we need to made a research to understand why get_user_by_username
     # fail with a Exception in ASGI application
     log.log_info_message("getting user", module)
-    db = SessionLocal()
-    for attemp in range(10):
-        log.log_info_message(f"getting user, attempt: {attemp}", module)
-        user = LocalImpl(db).get_user_by_username(username=username)
-        if user is not None:
-            return user
-    return None
+    db = next(get_db())
+
+
+    # for attemp in range(10):
+    #     log.log_info_message(f"getting user, attempt: {attemp}", module)
+    #    user = LocalImpl(db).get_user_by_username(username=username)
+    #    if user is not None:
+    #        return user
+    # return None
+    user = LocalImpl(db).get_user_by_username(username=username)
+    return user
 
 
 def authenticate_user(db: Session, username: str, password: str) -> bool:
