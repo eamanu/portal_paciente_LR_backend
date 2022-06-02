@@ -34,7 +34,6 @@ app = FastAPI(
 
 log = MainLogger()
 module = logging.getLogger(__name__)
-db: Session = SessionLocal()
 
 # region CORS
 
