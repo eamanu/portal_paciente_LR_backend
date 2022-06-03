@@ -1,12 +1,12 @@
 import re
 
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import Session
 from starlette.requests import Request
 from starlette.routing import Match
 
 from app.config.config import DEBUG_ENABLED
-from app.config.database import Base
-from app.main import get_db
+from app.config.database import Base, SessionLocal
 from app.models.role_permission import RolePermission
 from app.models.user import User
 from app.models.user_role import UserRole
@@ -28,7 +28,7 @@ class Permission(Base):
 
     @staticmethod
     def user_is_authorized(username: str, path: str, method: str) -> bool:
-        db = next(get_db())
+        db: Session = SessionLocal()
 
         permissions = db.query(Permission) \
             .join(RolePermission, RolePermission.id == RolePermission.id_permission) \
@@ -58,7 +58,7 @@ class Permission(Base):
 
     @staticmethod
     def user_is_authorized2(username: str, request: Request) -> bool:
-        db = next(get_db())
+        db: Session = SessionLocal()
         routes = request.app.router.routes
 
         name = ''
