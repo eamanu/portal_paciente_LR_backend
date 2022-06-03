@@ -36,6 +36,8 @@ class Permission(Base):
             .join(User, UserRole.id_user == User.id and User.username == username) \
             .all()
 
+        db.close()
+
         for permission in permissions:
             patterns = [permission.url]
             pattern = '(?:% s)' % '|'.join(patterns)
@@ -67,6 +69,8 @@ class Permission(Base):
                 name = route.name
 
         user = db.query(User).where(User.username == username).first()
+
+        db.close()
 
         if name in ADMIN_ROUTES:
             if user.is_admin:

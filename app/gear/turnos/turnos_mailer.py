@@ -9,6 +9,7 @@ from app.gear.mailer.mailer import send_email
 from app.main import get_db
 from app.models.person import Person
 
+
 db: Session = next(get_db())
 
 log = MainLogger()
