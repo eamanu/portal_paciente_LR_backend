@@ -6,11 +6,10 @@ from starlette.routing import Match
 
 from app.config.config import DEBUG_ENABLED
 from app.config.database import Base
-from app.config.database import SessionLocal
+from app.main import get_db
 from app.models.role_permission import RolePermission
 from app.models.user import User
 from app.models.user_role import UserRole
-
 
 ADMIN_ROUTES = ['create_message', 'update_message', 'delete_message', 'send_message',
                 'set_admin_status_to_person', 'get_admin_status', 'Remove a Person',
@@ -29,7 +28,7 @@ class Permission(Base):
 
     @staticmethod
     def user_is_authorized(username: str, path: str, method: str) -> bool:
-        db = SessionLocal()
+        db = next(get_db())
 
         permissions = db.query(Permission) \
             .join(RolePermission, RolePermission.id == RolePermission.id_permission) \
@@ -57,7 +56,7 @@ class Permission(Base):
 
     @staticmethod
     def user_is_authorized2(username: str, request: Request) -> bool:
-        db = SessionLocal()
+        db = next(get_db())
         routes = request.app.router.routes
 
         name = ''
