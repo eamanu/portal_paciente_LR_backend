@@ -4,13 +4,13 @@ from sqlalchemy.orm import Session
 from app.config.config import (
     DEBUG_MAIL_VALIDATION,
 )
-from app.config.database import SessionLocal
 from app.gear.log.main_logger import MainLogger, logging
 from app.gear.mailer.mailer import send_email
+from app.main import get_db
 from app.models.person import Person
 
 
-db: Session = SessionLocal()
+db: Session = next(get_db())
 
 log = MainLogger()
 module = logging.getLogger(__name__)

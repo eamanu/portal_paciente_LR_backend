@@ -11,7 +11,6 @@ from app.models.role_permission import RolePermission
 from app.models.user import User
 from app.models.user_role import UserRole
 
-
 ADMIN_ROUTES = ['create_message', 'update_message', 'delete_message', 'send_message',
                 'set_admin_status_to_person', 'get_admin_status', 'Remove a Person',
                 'Deny access to a Person', 'Accept a Person', 'List of id_admin_status Person',
@@ -36,6 +35,8 @@ class Permission(Base):
             .join(UserRole, RolePermission.id_role == UserRole.id_role) \
             .join(User, UserRole.id_user == User.id and User.username == username) \
             .all()
+
+        db.close()
 
         for permission in permissions:
             patterns = [permission.url]
@@ -68,6 +69,8 @@ class Permission(Base):
                 name = route.name
 
         user = db.query(User).where(User.username == username).first()
+
+        db.close()
 
         if name in ADMIN_ROUTES:
             if user.is_admin:
