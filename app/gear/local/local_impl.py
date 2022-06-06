@@ -15,6 +15,7 @@ from app.config.config import (
     DEBUG_ENABLED,
     LOCAL_FILE_UPLOAD_DIRECTORY,
     LOCAL_FILE_DOWNLOAD_DIRECTORY,
+    VALIDATE_EMAIL_PATH,
 )
 from app.gear.local.bearer_token import BearerToken
 from app.gear.log.main_logger import MainLogger, logging
@@ -64,14 +65,15 @@ class LocalImpl:
                 status_code=status.HTTP_204_NO_CONTENT,
                 headers={
                     "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "POST, GET, OPTIONS, DELETE",
+                    "Access-Control-Allow-Methods": "POST, GET, OPTIONS, DELETE, PUT",
                     "Access-Control-Max-Age": "86400",
                     "Access-Control-Allow-Headers": "authorization",
                     "Content-type": "application/json"
                 }
             )
 
-        if AUTHORIZATION_ENABLED and (request.scope["path"] not in WHITE_LIST_PATH):
+        if AUTHORIZATION_ENABLED and (request.scope["path"] not in WHITE_LIST_PATH or
+                                      VALIDATE_EMAIL_PATH not in request.scope["path"]):
 
             auth_token = request.headers.get("Authorization")
             bearer_token = BearerToken(auth_token)

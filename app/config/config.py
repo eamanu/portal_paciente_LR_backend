@@ -30,7 +30,6 @@ WHITE_LIST_PATH = (
     LR_BASE_API + "/parametric/identificationtypes",
     LR_BASE_API + "/recover-password",
     LR_BASE_API + "/change-password",
-    LR_BASE_API + "/validate-email",
     LR_BASE_API + "/createpersonanduser",
     LR_BASE_API + "/createperson",
     LR_BASE_API + "/uploadidentificationimages",
@@ -43,6 +42,8 @@ WHITE_LIST_PATH = (
     "/favicon.ico",
     "/",
 )
+
+VALIDATE_EMAIL_PATH = LR_BASE_API + "/validate-email"
 
 # endregion
 
