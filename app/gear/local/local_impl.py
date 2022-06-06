@@ -67,8 +67,8 @@ class LocalImpl:
                     "Access-Control-Allow-Origin": "*",
                     "Access-Control-Allow-Methods": "POST, GET, OPTIONS, DELETE, PUT",
                     "Access-Control-Max-Age": "86400",
-                    "Access-Control-Allow-Headers": "authorization",
-                    "Content-type": "application/json"
+                    "Access-Control-Allow-Headers": "*",
+                    "Content-type": "*"
                 }
             )
 
