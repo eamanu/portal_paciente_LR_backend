@@ -72,7 +72,7 @@ class LocalImpl:
                 }
             )
 
-        if AUTHORIZATION_ENABLED and (request.scope["path"] not in WHITE_LIST_PATH or
+        if AUTHORIZATION_ENABLED and (request.scope["path"] not in WHITE_LIST_PATH and
                                       VALIDATE_EMAIL_PATH not in request.scope["path"]):
 
             auth_token = request.headers.get("Authorization")
