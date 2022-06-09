@@ -1,7 +1,5 @@
 # Portal Pacientes La Rioja - Backend
 
-TODO
-
 ## Requerimientos
 
 Python 3.9+
