@@ -2,7 +2,7 @@ from fastapi_mail import MessageSchema
 from sqlalchemy.orm import Session
 
 from app.config.config import (
-    DEBUG_MAIL_VALIDATION,
+    MAIL_USERNAME,
 )
 from app.gear.log.main_logger import MainLogger, logging
 from app.gear.mailer.mailer import send_email
@@ -21,11 +21,9 @@ async def send_turno_mail(person_id: str, subject: str, body: str) -> bool:
         db.query(Person).where(Person.id == person_id).first()
     )  # type: Person
 
-    # TODO: REMOVE THIS BEFORE GO TO PRODUCTION
-    recipients = (DEBUG_MAIL_VALIDATION if DEBUG_MAIL_VALIDATION else existing_person.email)
     message = MessageSchema(
         subject=subject,
-        recipients=[recipients],  # List of recipients, as many as you can pass
+        recipients=[MAIL_USERNAME],
         body=body,
         # subtype="html",
     )
