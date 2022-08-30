@@ -48,8 +48,7 @@ MYSQL_DATABASE=portal_paciente_LR
 MYSQL_USER=<user>
 MYSQL_PASSWORD=<user>
 
-Luego se debe levantar la aplicación ejecutando desde la raiz del
-proyecto:
+Luego se debe levantar utilizando el siguiente [docker-compose](https://github.com/eamanu/portal_pacientes_docker-compose/blob/main/docker-compose.yml). Se recomienda buildear las imagenes localmente.
 
 ```bash
 $ docker-compose up -d
@@ -59,7 +58,7 @@ Este docker-compose levanta un MariaDB y el Backend, además de Adminer para
 la gestión de la base de datos. Si no se quiere instalar Adminer eliminar el 
 servicio del docker-compose.
 
-Luego debemos crear la base de datos ejecutando el siguiente commando:
+Luego debemos rellenar la base de datos ejecutando el siguiente commando:
 
 ```bash
 $ cat database/initfile.sql | docker exec -i portal_pacientes_db /usr/bin/mysql -u root  --password=root portal_paciente_LR
