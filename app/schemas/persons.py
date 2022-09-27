@@ -9,6 +9,7 @@ class PersonsReduced(BaseModel):
     surname: str
     id_admin_status: int
     id_person_status: int
+    id_usual_institution: int = -1
 
 
 class Person(BaseModel):
